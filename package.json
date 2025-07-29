@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:contracts": "hardhat test"
+    "test:contracts": "npx hardhat test"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",
