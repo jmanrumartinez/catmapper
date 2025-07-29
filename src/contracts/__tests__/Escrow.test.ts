@@ -1,5 +1,4 @@
 import { expect } from "chai";
-import hre from "hardhat";
 import { ethers } from "hardhat";
 
 const tokens = (n: number) => {

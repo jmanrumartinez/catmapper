@@ -6,8 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "test": "jest"
+    "lint": "next lint"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^6.1.0",

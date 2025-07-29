@@ -30,7 +30,6 @@ A decentralized real estate marketplace built on Ethereum blockchain that allows
 ### Development Tools
 
 - **ESLint** - Code linting
-- **Jest** - Testing framework
 - **Turbopack** - Fast bundler for development
 
 ## 📁 Project Structure
@@ -118,4 +117,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run test` - Run Jest tests
