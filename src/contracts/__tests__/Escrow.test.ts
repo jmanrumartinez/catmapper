@@ -7,5 +7,8 @@ const tokens = (n: number) => {
 describe("Escrow", () => {
   it("should store the addresses", async () => {
     const realEstate = await ethers.getContractFactory("RealEstate");
+    await realEstate.deploy();
+
+    console.log(realEstate.address);
   });
 });
