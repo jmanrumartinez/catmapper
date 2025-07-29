@@ -1,9 +1,6 @@
 import { expect } from "chai";
 import hre from "hardhat";
-
-const tokens = (n) => {
-  return hre.ethers.parseUnits(n.toString(), "ether");
-};
+import { parseEther } from "viem";
 
 describe("Escrow", () => {
   let escrow = null;
@@ -67,7 +64,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
     expect(await realEstate.ownerOf(nftId)).to.be.equal(await escrow.getAddress())
 
@@ -76,10 +73,10 @@ describe("Escrow", () => {
     expect(isListed).to.equal(true);
 
     const purchasePrice = await escrow.getPurchasePrice(nftId);
-    expect(purchasePrice).to.equal(tokens(10));
+    expect(purchasePrice).to.equal(parseEther("10"));
 
     const escrowAmount = await escrow.getEscrowAmount(nftId);
-    expect(escrowAmount).to.equal(tokens(5));
+    expect(escrowAmount).to.equal(parseEther("5"));
 
     const buyerNft = await escrow.getBuyer(nftId);
     expect(buyerNft).to.equal(buyer.address)
@@ -89,7 +86,7 @@ describe("Escrow", () => {
     const nftId = 1;
 
     await expect(
-      escrow.connect(random).list(nftId, buyer.address, tokens(10), tokens(5))
+      escrow.connect(random).list(nftId, buyer.address, parseEther("10"), parseEther("5"))
     ).to.be.revertedWith("Only seller can call this method");
   })
 
@@ -100,17 +97,17 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
 
     transaction = await escrow.connect(buyer).depositEscrow(1, {
-      value: tokens(5)
+      value: parseEther("5")
     })
 
     await transaction.wait();
     const balanceOfEscrow = await escrow.getBalance();
 
-    expect(balanceOfEscrow).to.be.equal(tokens(5));
+    expect(balanceOfEscrow).to.be.equal(parseEther("5"));
   })
 
   it('should mark a property as inspected', async () => {
@@ -120,7 +117,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
 
     transaction = await escrow.connect(inspector).setInspectionStatus(nftId, true);
@@ -137,7 +134,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
 
     expect(escrow.connect(random).setInspectionStatus(nftId, true)).to.be.revertedWith("Only inspector can call this method")
@@ -150,7 +147,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
 
     // Approve the sale
@@ -175,7 +172,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, parseEther("10"), parseEther("5"));
     await transaction.wait();
 
     // Inspector mark as as inspected 
@@ -184,14 +181,14 @@ describe("Escrow", () => {
 
     // Buyer deposits escrow amount
     transaction = await escrow.connect(buyer).depositEscrow(nftId, {
-      value: tokens(5)
+      value: parseEther("5")
     });
     await transaction.wait();
 
     // Lender pays the remaining amount (purchase price - escrow amount)
     await lender.sendTransaction({
       to: await escrow.getAddress(),
-      value: tokens(5)
+      value: parseEther("5")
     })
 
     // Approve the sale
@@ -205,7 +202,7 @@ describe("Escrow", () => {
     await transaction.wait();
 
     // We check the escrow to have the money on hold from the buyer + lender.
-    expect(await escrow.getBalance()).to.equals(tokens(10))
+    expect(await escrow.getBalance()).to.equals(parseEther("10"))
 
     // We transfer the property
     transaction = await escrow.connect(seller).finalizeSale(nftId);
