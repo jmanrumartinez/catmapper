@@ -1,3 +1,5 @@
+import { expect } from "chai";
+import hre from "hardhat";
 import { ethers } from "hardhat";
 
 const tokens = (n: number) => {
@@ -6,8 +8,8 @@ const tokens = (n: number) => {
 
 describe("Escrow", () => {
   it("should store the addresses", async () => {
-    const realEstate = await ethers.getContractFactory("RealEstate");
-    await realEstate.deploy();
+    const realEstateFactory = await ethers.getContractFactory("RealEstate");
+    const realEstate = await realEstateFactory.deploy();
 
     console.log(realEstate.address);
   });
