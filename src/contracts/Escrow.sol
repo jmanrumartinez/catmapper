@@ -104,6 +104,10 @@ contract Escrow {
         properties[_nftId].inspectionPassed = _passedInspection;
     }
 
+    function hasPassedInspection(uint256 _nftId) public view returns (bool) {
+        return properties[_nftId].inspectionPassed;
+    }
+
     function approveSale(uint256 _nftId) public {
         properties[_nftId].approvals[msg.sender] = true;
     }
@@ -113,5 +117,32 @@ contract Escrow {
         address _address
     ) public view returns (bool) {
         return properties[_nftId].approvals[_address];
+    }
+
+    function finalizeSale(uint256 _nftId) public {
+        require(
+            hasPassedInspection(_nftId),
+            "Property needs to pass the inspection"
+        );
+        require(hasApproved(_nftId, getBuyer(_nftId)), "Not approved by buyer");
+        require(hasApproved(_nftId, seller), "Not approved by seller");
+        require(hasApproved(_nftId, lender), "Not approved by lender");
+        require(
+            getBalance() >= getPurchasePrice(_nftId),
+            "Money not deposited"
+        );
+
+        (bool success, ) = payable(seller).call{
+            value: getPurchasePrice(_nftId)
+        }("");
+        require(success, "Error when paying the money to the seller");
+
+        IERC721(nftAddress).transferFrom(
+            address(this),
+            getBuyer(_nftId),
+            _nftId
+        );
+
+        properties[_nftId].listed = false;
     }
 }

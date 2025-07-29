@@ -167,4 +167,52 @@ describe("Escrow", () => {
     expect(await escrow.hasApproved(nftId, buyer.address)).to.equals(true);
     expect(await escrow.hasApproved(nftId, lender.address)).to.equals(true);
   })
+
+  it('should transfer the property when all the conditions are met', async () => {
+    const nftId = 1;
+
+    // List and transfer the property to the escrow
+    transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
+    await transaction.wait();
+
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    await transaction.wait();
+
+    // Inspector mark as as inspected 
+    transaction = await escrow.connect(inspector).setInspectionStatus(nftId, true);
+    await transaction.wait();
+
+    // Buyer deposits escrow amount
+    transaction = await escrow.connect(buyer).depositEscrow(nftId, {
+      value: tokens(5)
+    });
+    await transaction.wait();
+
+    // Lender pays the remaining amount (purchase price - escrow amount)
+    await lender.sendTransaction({
+      to: await escrow.getAddress(),
+      value: tokens(5)
+    })
+
+    // Approve the sale
+    transaction = await escrow.connect(seller).approveSale(nftId);
+    await transaction.wait();
+
+    transaction = await escrow.connect(buyer).approveSale(nftId);
+    await transaction.wait();
+
+    transaction = await escrow.connect(lender).approveSale(nftId);
+    await transaction.wait();
+
+    // We check the escrow to have the money on hold from the buyer + lender.
+    expect(await escrow.getBalance()).to.equals(tokens(10))
+
+    // We transfer the property
+    transaction = await escrow.connect(seller).finalizeSale(nftId);
+    await transaction.wait();
+
+    // We check the escrow to have not any money and now the buyer is the owner of the property
+    expect(await escrow.getBalance()).to.equals(0)
+    expect(await realEstate.ownerOf(1)).to.equals(buyer.address)
+  })
 });
