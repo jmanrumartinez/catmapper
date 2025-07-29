@@ -1,4 +1,4 @@
-import { ListingCard } from "@/components/ListingCard";
+import { ListingCard } from "@/components/listing/ListingCard";
 
 export default function Home() {
   return (
