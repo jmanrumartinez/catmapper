@@ -1,7 +1,11 @@
-import { ethers } from "ethers";
+import { ethers } from "hardhat";
 
 const tokens = (n: number) => {
   return ethers.parseUnits(n.toString(), "ether");
 };
 
-describe("Escrow", () => {});
+describe("Escrow", () => {
+  it("should store the addresses", async () => {
+    const realEstate = await ethers.getContractFactory("RealEstate");
+  });
+});
