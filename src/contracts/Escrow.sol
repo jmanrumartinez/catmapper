@@ -11,6 +11,7 @@ struct Property {
     uint256 escrowAmount;
     address buyer;
     bool inspectionPassed;
+    mapping(address => bool) approvals;
 }
 
 contract Escrow {
@@ -58,13 +59,12 @@ contract Escrow {
         uint256 _escrowAmount
     ) public payable onlySeller {
         IERC721(nftAddress).transferFrom(msg.sender, address(this), _nftId);
-        properties[_nftId] = Property({
-            listed: true,
-            purchasePrice: _purchasePrice,
-            escrowAmount: _escrowAmount,
-            buyer: _buyer,
-            inspectionPassed: false
-        });
+        Property storage p = properties[_nftId];
+        p.listed = true;
+        p.purchasePrice = _purchasePrice;
+        p.escrowAmount = _escrowAmount;
+        p.buyer = _buyer;
+        p.inspectionPassed = false;
     }
 
     function isListed(uint256 _nftId) public view returns (bool) {
@@ -102,5 +102,16 @@ contract Escrow {
         bool _passedInspection
     ) public onlyInspector {
         properties[_nftId].inspectionPassed = _passedInspection;
+    }
+
+    function approveSale(uint256 _nftId) public {
+        properties[_nftId].approvals[msg.sender] = true;
+    }
+
+    function hasApproved(
+        uint256 _nftId,
+        address _address
+    ) public view returns (bool) {
+        return properties[_nftId].approvals[_address];
     }
 }

@@ -142,4 +142,29 @@ describe("Escrow", () => {
 
     expect(escrow.connect(random).setInspectionStatus(nftId, true)).to.be.revertedWith("Only inspector can call this method")
   })
+
+  it('should approval the sale', async () => {
+    const nftId = 1;
+
+    // Approve transaction
+    transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
+    await transaction.wait();
+
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    await transaction.wait();
+
+    // Approve the sale
+    transaction = await escrow.connect(seller).approveSale(nftId);
+    await transaction.wait();
+
+    transaction = await escrow.connect(buyer).approveSale(nftId);
+    await transaction.wait();
+
+    transaction = await escrow.connect(lender).approveSale(nftId);
+    await transaction.wait();
+
+    expect(await escrow.hasApproved(nftId, seller.address)).to.equals(true);
+    expect(await escrow.hasApproved(nftId, buyer.address)).to.equals(true);
+    expect(await escrow.hasApproved(nftId, lender.address)).to.equals(true);
+  })
 });
