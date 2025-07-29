@@ -7,9 +7,11 @@ interface IERC721 {
 
 contract Escrow {
     address public nftAddress;
-    address public lender;
-    address public inspector;
     address payable public seller;
+    address public inspector;
+    address public lender;
+
+    mapping(uint256 => bool) public listedProperties;
 
     constructor(
         address _nftAddress,
@@ -21,5 +23,14 @@ contract Escrow {
         seller = _seller;
         inspector = _inspector;
         lender = _lender;
+    }
+
+    function list(uint256 _nftId) public {
+        IERC721(nftAddress).transferFrom(msg.sender, address(this), _nftId);
+        listedProperties[_nftId] = true;
+    }
+
+    function isListed(uint256 _nftId) public view returns (bool) {
+        return listedProperties[_nftId];
     }
 }
