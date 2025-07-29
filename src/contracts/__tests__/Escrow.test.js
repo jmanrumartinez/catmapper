@@ -112,4 +112,34 @@ describe("Escrow", () => {
 
     expect(balanceOfEscrow).to.be.equal(tokens(5));
   })
+
+  it('should mark a property as inspected', async () => {
+    const nftId = 1;
+
+    // Approve transaction
+    transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
+    await transaction.wait();
+
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    await transaction.wait();
+
+    transaction = await escrow.connect(inspector).setInspectionStatus(nftId, true);
+    await transaction.wait();
+
+    const isInspected = await escrow.isInspected(nftId);
+    expect(isInspected).to.equal(true);
+  })
+
+  it('should not allow to mark a property if its not the inspector', async () => {
+    const nftId = 1;
+
+    // Approve transaction
+    transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
+    await transaction.wait();
+
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    await transaction.wait();
+
+    expect(escrow.connect(random).setInspectionStatus(nftId, true)).to.be.revertedWith("Only inspector can call this method")
+  })
 });

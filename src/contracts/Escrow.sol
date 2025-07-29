@@ -10,6 +10,7 @@ struct Property {
     uint256 purchasePrice;
     uint256 escrowAmount;
     address buyer;
+    bool inspectionPassed;
 }
 
 contract Escrow {
@@ -45,6 +46,11 @@ contract Escrow {
         _;
     }
 
+    modifier onlyInspector() {
+        require(inspector == msg.sender, "Only inspector can call this method");
+        _;
+    }
+
     function list(
         uint256 _nftId,
         address _buyer,
@@ -56,12 +62,17 @@ contract Escrow {
             listed: true,
             purchasePrice: _purchasePrice,
             escrowAmount: _escrowAmount,
-            buyer: _buyer
+            buyer: _buyer,
+            inspectionPassed: false
         });
     }
 
     function isListed(uint256 _nftId) public view returns (bool) {
         return properties[_nftId].listed;
+    }
+
+    function isInspected(uint256 _nftId) public view returns (bool) {
+        return properties[_nftId].inspectionPassed;
     }
 
     function getPurchasePrice(uint256 _nftId) public view returns (uint256) {
@@ -84,5 +95,12 @@ contract Escrow {
 
     function getBalance() public view returns (uint256) {
         return address(this).balance;
+    }
+
+    function setInspectionStatus(
+        uint256 _nftId,
+        bool _passedInspection
+    ) public onlyInspector {
+        properties[_nftId].inspectionPassed = _passedInspection;
     }
 }
