@@ -1,4 +1,4 @@
-import { Bath, Bed, Car, MapPin, Square } from "lucide-react";
+import { Bath, Bed, MapPin, Square } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export const ListingCard = () => {
   return (
-    <Card className="w-full max-w-md overflow-hidden shadow-lg border-0 bg-white py-0">
+    <Card className="w-full max-w-sm overflow-hidden shadow-lg border-0 bg-white py-0">
       <div className="relative">
         <Image
           src="https://ipfs.io/ipfs/QmQUozrHLAusXDxrvsESJ3PYB3rUeUuBAvVWw6nop2uu7c/1.png"
