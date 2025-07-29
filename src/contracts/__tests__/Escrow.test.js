@@ -92,4 +92,24 @@ describe("Escrow", () => {
       escrow.connect(random).list(nftId, buyer.address, tokens(10), tokens(5))
     ).to.be.revertedWith("Only seller can call this method");
   })
+
+  it('should allow the buyer the deposit the escrow amount', async () => {
+    const nftId = 1;
+
+    // Approve transaction
+    transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
+    await transaction.wait();
+
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
+    await transaction.wait();
+
+    transaction = await escrow.connect(buyer).depositEscrow(1, {
+      value: tokens(5)
+    })
+
+    await transaction.wait();
+    const balanceOfEscrow = await escrow.getBalance();
+
+    expect(balanceOfEscrow).to.be.equal(tokens(5));
+  })
 });
