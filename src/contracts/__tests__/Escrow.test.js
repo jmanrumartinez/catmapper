@@ -8,7 +8,7 @@ const tokens = (n) => {
 describe("Escrow", () => {
   let escrow = null;
   let realEstateAddress = null;
-  let buyer, seller, inspector, lender = null
+  let buyer, seller, inspector, lender, random = null
   let realEstate = null
   let transaction = null;
 
@@ -18,11 +18,12 @@ describe("Escrow", () => {
     realEstate = await realEstateFactory.deploy();
 
     // Get signers
-    const [buyerSigner, sellerSigner, inspectorSigner, lenderSigner] = await hre.ethers.getSigners();
+    const [buyerSigner, sellerSigner, inspectorSigner, lenderSigner, randomSigner] = await hre.ethers.getSigners();
     buyer = buyerSigner;
     seller = sellerSigner;
     inspector = inspectorSigner;
     lender = lenderSigner;
+    random = randomSigner;
 
     // Mint a token
     transaction = await realEstate.connect(sellerSigner).mint("https://ipfs.io/ipfs/QmQVcpsjrA6cr1iJjZAodYwmPekYgbnXGo4DFubJiLc2EB/1.json");
@@ -66,7 +67,7 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId, buyer.address, 0, 0);
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, tokens(10), tokens(5));
     await transaction.wait();
     expect(await realEstate.ownerOf(nftId)).to.be.equal(await escrow.getAddress())
 
@@ -75,12 +76,20 @@ describe("Escrow", () => {
     expect(isListed).to.equal(true);
 
     const purchasePrice = await escrow.getPurchasePrice(nftId);
-    expect(purchasePrice).to.equal(0);
+    expect(purchasePrice).to.equal(tokens(10));
 
     const escrowAmount = await escrow.getEscrowAmount(nftId);
-    expect(escrowAmount).to.equal(0);
+    expect(escrowAmount).to.equal(tokens(5));
 
     const buyerNft = await escrow.getBuyer(nftId);
     expect(buyerNft).to.equal(buyer.address)
+  })
+
+  it('should not allow to list a property if the sender is not the seller', async () => {
+    const nftId = 1;
+
+    await expect(
+      escrow.connect(random).list(nftId, buyer.address, tokens(10), tokens(5))
+    ).to.be.revertedWith("Only seller can call this method");
   })
 });
