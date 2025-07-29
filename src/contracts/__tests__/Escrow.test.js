@@ -8,7 +8,7 @@ const tokens = (n) => {
 describe("Escrow", () => {
   let escrow = null;
   let realEstateAddress = null;
-  let seller, inspector, lender = null
+  let buyer, seller, inspector, lender = null
   let realEstate = null
   let transaction = null;
 
@@ -18,7 +18,8 @@ describe("Escrow", () => {
     realEstate = await realEstateFactory.deploy();
 
     // Get signers
-    const [sellerSigner, inspectorSigner, lenderSigner] = await hre.ethers.getSigners();
+    const [buyerSigner, sellerSigner, inspectorSigner, lenderSigner] = await hre.ethers.getSigners();
+    buyer = buyerSigner;
     seller = sellerSigner;
     inspector = inspectorSigner;
     lender = lenderSigner;
@@ -65,12 +66,21 @@ describe("Escrow", () => {
     transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), nftId)
     await transaction.wait();
 
-    transaction = await escrow.connect(seller).list(nftId);
+    transaction = await escrow.connect(seller).list(nftId, buyer.address, 0, 0);
     await transaction.wait();
     expect(await realEstate.ownerOf(nftId)).to.be.equal(await escrow.getAddress())
 
     // Now the NFT (representing the RE property is owned by the Escrow)
     const isListed = await escrow.isListed(nftId);
     expect(isListed).to.equal(true);
+
+    const purchasePrice = await escrow.getPurchasePrice(nftId);
+    expect(purchasePrice).to.equal(0);
+
+    const escrowAmount = await escrow.getEscrowAmount(nftId);
+    expect(escrowAmount).to.equal(0);
+
+    const buyerNft = await escrow.getBuyer(nftId);
+    expect(buyerNft).to.equal(buyer.address)
   })
 });
