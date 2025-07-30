@@ -76,8 +76,7 @@ export const ListingDialog = ({
   }, [escrow, id]);
 
   useEffect(() => {
-    initializeData();
-    fetchOwner();
+    initializeData().then(() => fetchOwner());
   }, [initializeData, fetchOwner]);
 
   const handleBuy = async () => {
@@ -134,7 +133,7 @@ export const ListingDialog = ({
     let transaction = await escrow.connect(signer).approveSale(id);
     await transaction.wait();
 
-    transaction = await escrow.finalizeSale(id);
+    transaction = await escrow.connect(signer).finalizeSale(id);
     await transaction.wait();
 
     setPropertyState((prevState) => ({
@@ -145,6 +144,8 @@ export const ListingDialog = ({
 
   // TODO: Please refactor this!!! This is so ugly lol
   const renderActionButton = () => {
+    console.log("stakeholders.owner", stakeholders.owner);
+
     if (stakeholders.owner) {
       return (
         <Button
