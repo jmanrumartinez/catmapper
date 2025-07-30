@@ -21,6 +21,7 @@ export type ListingCardType = {
 
 export const ListingCard = ({ property }: ListingCardType) => {
   const { address, description, image, name, attributes } = property;
+  const price = attributes[0];
 
   return (
     <Card className="w-full max-w-sm overflow-hidden shadow-lg border-0 bg-white py-0">
@@ -38,7 +39,7 @@ export const ListingCard = ({ property }: ListingCardType) => {
         <div className="space-y-4">
           <div>
             <h2 className="text-2xl font-bold text-purple-900 mb-1">
-              120.22 ETH
+              {price.value} ETH
             </h2>
             <p className="text-gray-600 text-sm flex items-center gap-1">
               <MapPin className="h-4 w-4" />

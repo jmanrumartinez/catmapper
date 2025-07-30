@@ -45,8 +45,14 @@ async function main() {
 
   await Promise.all(approvePromises);
 
+  const pricePerIndex = {
+    0: 20,
+    1: 15,
+    2: 10
+  }
+
   const listPromises = Array.from({ length: 3 }, () => null).map(async (_, index) => {
-    const transaction = await escrow.connect(seller).list(index + 1, buyer.address, parseEther("20"), parseEther("10"));
+    const transaction = await escrow.connect(seller).list(index + 1, buyer.address, parseEther(pricePerIndex[i] ?? "20"), parseEther("10"));
     await transaction.wait();
 
     console.log(`Listed property ${index + 1} at: ${transaction.hash} for 20 ETH`);
