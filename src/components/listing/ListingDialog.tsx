@@ -77,9 +77,6 @@ export const ListingDialog = ({
 
   // TODO: Please refactor this!!! This is so ugly lol
   const renderActionButton = () => {
-    console.log("account", account);
-    console.log("stakeholders", stakeholders);
-
     if (stakeholders.owner) {
       return (
         <Button
