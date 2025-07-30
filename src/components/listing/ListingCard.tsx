@@ -4,19 +4,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ListingAttributes } from "./ListingAttributes";
+import { PropertyType } from "@/types/listing";
 
 export type ListingCardType = {
-  property: {
-    address: string;
-    description: string;
-    id: string;
-    image: string;
-    name: string;
-    attributes: {
-      trait_type: string;
-      value: string | number;
-    }[];
-  };
+  property: PropertyType;
   onClickViewMore: (id: string) => void;
 };
 

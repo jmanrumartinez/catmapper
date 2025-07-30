@@ -39,15 +39,13 @@ export const NavigationBar = ({ onConnect, account }: NavigationBar) => {
             height={62}
             alt="Logo of Catmapper"
           />
-          <h1 className="text-[var(--clr-blue)] text-4xl font-bold">
-            Catmapper
-          </h1>
+          <h1 className="text-purple-600 text-4xl font-bold">Catmapper</h1>
         </div>
 
         {/* TODO: Replace this by RainbowKit  */}
         <Button
           onClick={handleConnect}
-          className="cursor-pointer bg-[var(--clr-blue)] hover:bg-[var(--clr-blue-2)] transition-all"
+          className="cursor-pointer bg-purple-600 hover:bg-purple-900 transition-all"
         >
           {(account && trimAccountHash(account)) ?? "Connect your wallet"}
         </Button>

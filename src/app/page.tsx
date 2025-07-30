@@ -7,6 +7,7 @@ import { ethers } from "ethers";
 import config from "@/consts/config.json";
 import RealEstateAbi from "@consts/abis/RealEstate.json";
 import EscrowAbi from "@consts/abis/Escrow.json";
+import { ListingDialog } from "@/components/listing/ListingDialog";
 
 export default function Home() {
   const [account, setAccount] = useState<string | undefined>();
@@ -16,6 +17,10 @@ export default function Home() {
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [escrow, setEscrow] = useState<ethers.Contract>();
   const [properties, setProperties] = useState([]);
+
+  // Dialog
+  const [isPropertyDialogVisible, setIsPropertyDialogVisible] = useState(false);
+  const [propertySelected, setPropertySelected] = useState();
 
   const handleConnectAccount = (account: string) => {
     setAccount(account);
@@ -69,7 +74,12 @@ export default function Home() {
     initializeConnection();
   }, []);
 
-  const handleClickViewMore = (id: string) => {};
+  const handleClickViewMore = (id: string) => {
+    setIsPropertyDialogVisible(true);
+    setPropertySelected(() => {
+      return properties.find((property) => property.id === id);
+    });
+  };
 
   return (
     <div>
@@ -88,6 +98,14 @@ export default function Home() {
           ))}
         </div>
       </div>
+      <ListingDialog
+        property={propertySelected}
+        isOpen={isPropertyDialogVisible}
+        onOpenChange={(isOpen) => {
+          setPropertySelected(undefined);
+          setIsPropertyDialogVisible(isOpen);
+        }}
+      />
     </div>
   );
 }

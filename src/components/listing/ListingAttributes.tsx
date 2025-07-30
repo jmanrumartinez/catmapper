@@ -1,17 +1,8 @@
-import { Bath, Bed, Square, House, Calendar } from "lucide-react";
+import { iconByType } from "@/consts/listing";
 import { ListingCardType } from "./ListingCard";
-import { createElement } from "react";
 
 type ListingAttributesType = {
   attributes: ListingCardType["property"]["attributes"];
-};
-
-const iconByType = {
-  "Type of Residence": House,
-  "Bed Rooms": Bed,
-  Bathrooms: Bath,
-  "Square Feet": Square,
-  "Year Built": Calendar,
 };
 
 export const ListingAttributes = ({ attributes }: ListingAttributesType) => {
