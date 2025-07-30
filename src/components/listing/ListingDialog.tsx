@@ -12,6 +12,7 @@ import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
+import { areAddressesEqual } from "@/lib/utils";
 
 type ListingDialogTypes = {
   isOpen: boolean;
@@ -88,9 +89,7 @@ export const ListingDialog = ({
       );
     }
 
-    if (
-      account.toLocaleLowerCase() === stakeholders.buyer.toLocaleLowerCase()
-    ) {
+    if (areAddressesEqual(account, stakeholders.buyer)) {
       return (
         <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
           Buy Now
@@ -98,9 +97,7 @@ export const ListingDialog = ({
       );
     }
 
-    if (
-      account.toLocaleLowerCase() === stakeholders.inspector.toLocaleLowerCase()
-    ) {
+    if (areAddressesEqual(account, stakeholders.inspector)) {
       return (
         <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
           Approve inspection
@@ -108,9 +105,7 @@ export const ListingDialog = ({
       );
     }
 
-    if (
-      account.toLocaleLowerCase() === stakeholders.seller.toLocaleLowerCase()
-    ) {
+    if (areAddressesEqual(account, stakeholders.seller)) {
       return (
         <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
           Approve & sell
@@ -118,9 +113,7 @@ export const ListingDialog = ({
       );
     }
 
-    if (
-      account.toLocaleLowerCase() === stakeholders.lender.toLocaleLowerCase()
-    ) {
+    if (areAddressesEqual(account, stakeholders.lender)) {
       return (
         <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
           Approve & lend
