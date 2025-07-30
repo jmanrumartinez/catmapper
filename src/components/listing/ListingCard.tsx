@@ -23,6 +23,7 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
           alt={description}
           width={400}
           height={240}
+          priority
           className="w-full h-60 object-cover"
         />
       </div>
