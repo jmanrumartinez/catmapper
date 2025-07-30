@@ -8,6 +8,7 @@ import config from "@/consts/config.json";
 import RealEstateAbi from "@consts/abis/RealEstate.json";
 import EscrowAbi from "@consts/abis/Escrow.json";
 import { ListingDialog } from "@/components/listing/ListingDialog";
+import { PropertyType } from "@/types/listing";
 
 export default function Home() {
   const [account, setAccount] = useState<string | undefined>();
@@ -16,11 +17,11 @@ export default function Home() {
   // Page data
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [escrow, setEscrow] = useState<ethers.Contract>();
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState<PropertyType[]>([]);
 
   // Dialog
   const [isPropertyDialogVisible, setIsPropertyDialogVisible] = useState(false);
-  const [propertySelected, setPropertySelected] = useState();
+  const [propertySelected, setPropertySelected] = useState<PropertyType>();
 
   const handleConnectAccount = (account: string) => {
     setAccount(account);
@@ -98,14 +99,16 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <ListingDialog
-        property={propertySelected}
-        isOpen={isPropertyDialogVisible}
-        onOpenChange={(isOpen) => {
-          setPropertySelected(undefined);
-          setIsPropertyDialogVisible(isOpen);
-        }}
-      />
+      {propertySelected ? (
+        <ListingDialog
+          property={propertySelected}
+          isOpen={isPropertyDialogVisible}
+          onOpenChange={(isOpen) => {
+            setPropertySelected(undefined);
+            setIsPropertyDialogVisible(isOpen);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

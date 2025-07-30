@@ -1,7 +1,7 @@
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
+  DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,11 +30,12 @@ export const ListingDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-purple-900">
-            {property.name}
-          </DialogTitle>
-        </DialogHeader>
+        <DialogTitle className="text-2xl font-bold text-purple-900">
+          {property.name}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Property details for {property.name} located at {property.address}
+        </DialogDescription>
 
         <div className="space-y-6">
           <Image
