@@ -20,6 +20,7 @@ type ListingDialogTypes = {
   property: PropertyType;
   escrow: ethers.Contract;
   account: string;
+  provider: ethers.BrowserProvider;
 };
 
 export const ListingDialog = ({
@@ -28,11 +29,14 @@ export const ListingDialog = ({
   onOpenChange,
   property,
   account,
+  provider,
 }: ListingDialogTypes) => {
   const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
   const { attributes, id } = property;
   const [price, type, ...restAttributes] = attributes;
-  const [propertyState, setPropertyState] = useState<Record<string, boolean>>();
+  const [propertyState, setPropertyState] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const fetchOwner = useCallback(async () => {
     const isListed = await escrow.isListed(id);
@@ -76,6 +80,69 @@ export const ListingDialog = ({
     fetchOwner();
   }, [initializeData, fetchOwner]);
 
+  const handleBuy = async () => {
+    const escrowAmount = await escrow.getEscrowAmount(id);
+    const signer = await provider.getSigner();
+
+    let transaction = await escrow
+      .connect(signer)
+      .depositEscrow(id, { value: escrowAmount });
+    await transaction.wait();
+
+    transaction = await escrow.connect(signer).approveSale(id);
+    await transaction.wait();
+
+    setPropertyState((prevState) => ({
+      ...prevState,
+      hasBought: true,
+    }));
+  };
+  const handleInspect = async () => {
+    const signer = await provider.getSigner();
+
+    const transaction = await escrow
+      .connect(signer)
+      .setInspectionStatus(id, true);
+    await transaction.wait();
+
+    setPropertyState((prevState) => ({
+      ...prevState,
+      hasInspected: true,
+    }));
+  };
+  const handleLend = async () => {
+    const signer = await provider.getSigner();
+    const transaction = await escrow.connect(signer).approveSale(id);
+    await transaction.wait();
+
+    const lendAmount =
+      (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
+
+    await signer.sendTransaction({
+      to: await escrow.getAddress(),
+      value: lendAmount.toString(),
+      gasLimit: 60000,
+    });
+
+    setPropertyState((prevState) => ({
+      ...prevState,
+      hasLended: true,
+    }));
+  };
+  const handleSell = async () => {
+    const signer = await provider.getSigner();
+    let transaction = await escrow.connect(signer).approveSale(id);
+    await transaction.wait();
+
+    transaction = await escrow.finalizeSale(id);
+    await transaction.wait();
+
+    setPropertyState((prevState) => ({
+      ...prevState,
+      hasSold: true,
+    }));
+  };
+
   // TODO: Please refactor this!!! This is so ugly lol
   const renderActionButton = () => {
     if (stakeholders.owner) {
@@ -91,7 +158,11 @@ export const ListingDialog = ({
 
     if (areAddressesEqual(account, stakeholders.buyer)) {
       return (
-        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+        <Button
+          onClick={handleBuy}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasBought}
+        >
           Buy Now
         </Button>
       );
@@ -99,7 +170,11 @@ export const ListingDialog = ({
 
     if (areAddressesEqual(account, stakeholders.inspector)) {
       return (
-        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+        <Button
+          onClick={handleInspect}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasInspected}
+        >
           Approve inspection
         </Button>
       );
@@ -107,7 +182,11 @@ export const ListingDialog = ({
 
     if (areAddressesEqual(account, stakeholders.seller)) {
       return (
-        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+        <Button
+          onClick={handleSell}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasSold}
+        >
           Approve & sell
         </Button>
       );
@@ -115,7 +194,11 @@ export const ListingDialog = ({
 
     if (areAddressesEqual(account, stakeholders.lender)) {
       return (
-        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+        <Button
+          onClick={handleLend}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasLended}
+        >
           Approve & lend
         </Button>
       );

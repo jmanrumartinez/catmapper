@@ -99,8 +99,9 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {propertySelected && escrow && account ? (
+      {propertySelected && escrow && account && provider ? (
         <ListingDialog
+          provider={provider}
           account={account}
           escrow={escrow}
           property={propertySelected}
