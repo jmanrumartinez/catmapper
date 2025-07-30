@@ -2,39 +2,84 @@
 
 import { ListingCard } from "@/components/listing/ListingCard";
 import { NavigationBar } from "@/components/shared/navigation/NavigationBar";
-import { ethers } from "ethers";
 import { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import config from "@/consts/config.json";
+import RealEstateAbi from "@consts/abis/RealEstate.json";
+import EscrowAbi from "@consts/abis/Escrow.json";
 
 export default function Home() {
-  const [account, setAccount] = useState();
+  const [account, setAccount] = useState<string | undefined>();
+  const [provider, setProvider] = useState<ethers.BrowserProvider>();
+
+  // Page data
+  const [totalSupply, setTotalSupply] = useState<number>(0);
+  const [escrow, setEscrow] = useState<ethers.Contract>();
+  const [properties, setProperties] = useState([]);
+
+  const handleConnectAccount = (account: string) => {
+    setAccount(account);
+  };
 
   useEffect(() => {
-    const loadBlockchainData = async () => {
+    const initializeConnection = async () => {
       if (!window.ethereum) {
         return;
       }
 
       const provider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(provider);
+
+      const network = await provider.getNetwork();
+
+      const realEstate = new ethers.Contract(
+        config[network.chainId].realEstate.address,
+        RealEstateAbi,
+        provider
+      );
+      const totalSupply = await realEstate.totalSupply();
+      setTotalSupply(totalSupply);
+
+      const propertiesToLoad = [];
+      for (let i = 1; i <= totalSupply; i++) {
+        const uri = await realEstate.tokenURI(i);
+        const response = await fetch(uri);
+        const data = await response.json();
+        propertiesToLoad.push(data);
+      }
+
+      setProperties(propertiesToLoad);
+      console.log("propertiesToLoad", propertiesToLoad);
+
+      const escrow = new ethers.Contract(
+        config[network.chainId].escrow.address,
+        EscrowAbi,
+        provider
+      );
+      setEscrow(escrow);
+    };
+
+    window.ethereum.on("accountsChanged", async () => {
       const [account] = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
-      setAccount(account);
 
-      console.log("account", account);
-    };
-
-    loadBlockchainData();
+      handleConnectAccount(account);
+    });
+    initializeConnection();
   }, []);
 
   return (
     <div>
-      <NavigationBar></NavigationBar>
+      <NavigationBar onConnect={handleConnectAccount} account={account} />
       <div className="max-w-7xl mx-auto my-0 py-0 px-5">
         <h3 className="mt-12 mx-0 mb-5 text-2xl font-bold">
-          Welcome to Catmapper
+          {totalSupply} available properties for you
         </h3>
         <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(min(100%,350px),1fr))]">
-          <ListingCard />
+          {properties.map((property) => (
+            <ListingCard key={property.id} property={property} />
+          ))}
         </div>
       </div>
     </div>

@@ -1,16 +1,33 @@
-import { Bath, Bed, MapPin, Square } from "lucide-react";
+import { MapPin } from "lucide-react";
 import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ListingAttributes } from "./ListingAttributes";
 
-export const ListingCard = () => {
+export type ListingCardType = {
+  property: {
+    address: string;
+    description: string;
+    id: string;
+    image: string;
+    name: string;
+    attributes: {
+      trait_type: string;
+      value: string | number;
+    }[];
+  };
+};
+
+export const ListingCard = ({ property }: ListingCardType) => {
+  const { address, description, image, name, attributes } = property;
+
   return (
     <Card className="w-full max-w-sm overflow-hidden shadow-lg border-0 bg-white py-0">
       <div className="relative">
         <Image
-          src="https://ipfs.io/ipfs/QmQUozrHLAusXDxrvsESJ3PYB3rUeUuBAvVWw6nop2uu7c/1.png"
-          alt="Modern luxury home"
+          src={image}
+          alt={description}
           width={400}
           height={240}
           className="w-full h-60 object-cover"
@@ -21,28 +38,15 @@ export const ListingCard = () => {
         <div className="space-y-4">
           <div>
             <h2 className="text-2xl font-bold text-purple-900 mb-1">
-              $1,250,000
+              120.22 ETH
             </h2>
             <p className="text-gray-600 text-sm flex items-center gap-1">
               <MapPin className="h-4 w-4" />
-              2847 Maple Street, Beverly Hills, CA 90210
+              {address}
             </p>
           </div>
 
-          <div className="flex items-center gap-6 text-gray-700">
-            <div className="flex items-center gap-1">
-              <Bed className="h-4 w-4" />
-              <span className="text-sm font-medium">4</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Bath className="h-4 w-4" />
-              <span className="text-sm font-medium">3</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Square className="h-4 w-4" />
-              <span className="text-sm font-medium">2,400 sqft</span>
-            </div>
-          </div>
+          <ListingAttributes attributes={attributes} />
 
           <div className="flex gap-3 pt-2">
             <Button
