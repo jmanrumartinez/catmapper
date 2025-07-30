@@ -17,10 +17,11 @@ export type ListingCardType = {
       value: string | number;
     }[];
   };
+  onClickViewMore: (id: string) => void;
 };
 
-export const ListingCard = ({ property }: ListingCardType) => {
-  const { address, description, image, name, attributes } = property;
+export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
+  const { address, id, description, image, attributes } = property;
   const price = attributes[0];
 
   return (
@@ -53,6 +54,7 @@ export const ListingCard = ({ property }: ListingCardType) => {
             <Button
               variant="outline"
               className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 rounded-lg bg-transparent cursor-pointer"
+              onClick={() => onClickViewMore(id)}
             >
               View Details
             </Button>

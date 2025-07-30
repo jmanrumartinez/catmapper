@@ -69,6 +69,8 @@ export default function Home() {
     initializeConnection();
   }, []);
 
+  const handleClickViewMore = (id: string) => {};
+
   return (
     <div>
       <NavigationBar onConnect={handleConnectAccount} account={account} />
@@ -78,7 +80,11 @@ export default function Home() {
         </h3>
         <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(min(100%,350px),1fr))]">
           {properties.map((property) => (
-            <ListingCard key={property.id} property={property} />
+            <ListingCard
+              key={property.id}
+              property={property}
+              onClickViewMore={handleClickViewMore}
+            />
           ))}
         </div>
       </div>
