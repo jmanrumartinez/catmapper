@@ -1,35 +1,15 @@
 import Image from "next/image";
 import { Button } from "@components/ui/button";
+import { NavigationLink } from "./NavigationLink";
 
 export const NavigationBar = () => {
   return (
     <nav className="w-full">
       <div className="mx-auto max-w-7xl py-8 flex items-center justify-between">
         <ul className="flex items-center list-none">
-          <li className="my-0 mx-3.5">
-            <a
-              className="no-underline text-[var(--clr-black)] hover:text-[var(--clr-blue)]"
-              href="#"
-            >
-              Buy
-            </a>
-          </li>
-          <li className="my-0 mx-3.5">
-            <a
-              className="no-underline text-[var(--clr-black)] hover:text-[var(--clr-blue)]"
-              href="#"
-            >
-              Rent
-            </a>
-          </li>
-          <li className="my-0 mx-3.5">
-            <a
-              className="no-underline text-[var(--clr-black)] hover:text-[var(--clr-blue)]"
-              href="#"
-            >
-              Sell
-            </a>
-          </li>
+          <NavigationLink>Buy</NavigationLink>
+          <NavigationLink>Sell</NavigationLink>
+          <NavigationLink>Rent</NavigationLink>
         </ul>
 
         <div className="flex justify-center items-center">

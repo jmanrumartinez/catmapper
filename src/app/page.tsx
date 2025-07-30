@@ -1,7 +1,7 @@
 "use client";
 
 import { ListingCard } from "@/components/listing/ListingCard";
-import { NavigationBar } from "@/components/shared/NavigationBar";
+import { NavigationBar } from "@/components/shared/navigation/NavigationBar";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 
