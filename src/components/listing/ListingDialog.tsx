@@ -10,22 +10,127 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
+import { ethers } from "ethers";
+import { useCallback, useEffect, useState } from "react";
 
 type ListingDialogTypes = {
   isOpen: boolean;
   onOpenChange: (value: boolean) => void;
   property: PropertyType;
+  escrow: ethers.Contract;
+  account: string;
 };
 
 export const ListingDialog = ({
+  escrow,
   isOpen,
   onOpenChange,
   property,
+  account,
 }: ListingDialogTypes) => {
-  if (!property) return null;
-
-  const { attributes } = property;
+  const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
+  const { attributes, id } = property;
   const [price, type, ...restAttributes] = attributes;
+  const [propertyState, setPropertyState] = useState<Record<string, boolean>>();
+
+  const fetchOwner = useCallback(async () => {
+    const isListed = await escrow.isListed(id);
+    if (isListed) return;
+
+    const owner = await escrow.getBuyer(id);
+    setStakeholders((prevStakeholders) => ({
+      ...prevStakeholders,
+      owner,
+    }));
+  }, [escrow, id]);
+
+  const initializeData = useCallback(async () => {
+    const buyer = await escrow.getBuyer(id);
+    const seller = await escrow.seller();
+    const lender = await escrow.lender();
+    const inspector = await escrow.inspector();
+
+    setStakeholders({
+      buyer,
+      seller,
+      lender,
+      inspector,
+    });
+
+    const hasBought = await escrow.hasApproved(id, buyer);
+    const hasLended = await escrow.hasApproved(id, lender);
+    const hasInspected = await escrow.hasPassedInspection(id);
+    const hasSold = await escrow.hasApproved(id, seller);
+
+    setPropertyState({
+      hasBought,
+      hasLended,
+      hasInspected,
+      hasSold,
+    });
+  }, [escrow, id]);
+
+  useEffect(() => {
+    initializeData();
+    fetchOwner();
+  }, [initializeData, fetchOwner]);
+
+  // TODO: Please refactor this!!! This is so ugly lol
+  const renderActionButton = () => {
+    console.log("account", account);
+    console.log("stakeholders", stakeholders);
+
+    if (stakeholders.owner) {
+      return (
+        <Button
+          disabled
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+        >
+          Property owned
+        </Button>
+      );
+    }
+
+    if (
+      account.toLocaleLowerCase() === stakeholders.buyer.toLocaleLowerCase()
+    ) {
+      return (
+        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+          Buy Now
+        </Button>
+      );
+    }
+
+    if (
+      account.toLocaleLowerCase() === stakeholders.inspector.toLocaleLowerCase()
+    ) {
+      return (
+        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+          Approve inspection
+        </Button>
+      );
+    }
+
+    if (
+      account.toLocaleLowerCase() === stakeholders.seller.toLocaleLowerCase()
+    ) {
+      return (
+        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+          Approve & sell
+        </Button>
+      );
+    }
+
+    if (
+      account.toLocaleLowerCase() === stakeholders.lender.toLocaleLowerCase()
+    ) {
+      return (
+        <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
+          Approve & lend
+        </Button>
+      );
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -75,9 +180,7 @@ export const ListingDialog = ({
           </div>
 
           <div className="flex gap-3">
-            <Button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer">
-              Buy Now
-            </Button>
+            {Object.keys(stakeholders).length ? renderActionButton() : null}
             <Button
               variant="outline"
               className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 bg-transparent  cursor-pointer"

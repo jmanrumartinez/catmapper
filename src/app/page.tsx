@@ -99,8 +99,10 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {propertySelected ? (
+      {propertySelected && escrow && account ? (
         <ListingDialog
+          account={account}
+          escrow={escrow}
           property={propertySelected}
           isOpen={isPropertyDialogVisible}
           onOpenChange={(isOpen) => {
