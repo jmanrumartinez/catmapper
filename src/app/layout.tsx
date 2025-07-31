@@ -20,6 +20,10 @@ export const metadata: Metadata = {
   title: "Catmapper - Find the next house for your cat",
   description:
     "Catmapper helps you discover and buy the perfect property for your feline friend. Browse listings, view details, and find your cat's next home with ease.",
+  keywords:
+    "real estate, property, NFT, blockchain, cat homes, real estate marketplace",
+  viewport: "width=device-width, initial-scale=1",
+  robots: "index, follow",
 };
 
 export default function RootLayout({
@@ -35,7 +39,7 @@ export default function RootLayout({
         <Providers>
           <div className="w-full">
             <NavigationBar />
-            {children}
+            <main id="main-content">{children}</main>
           </div>
         </Providers>
       </body>

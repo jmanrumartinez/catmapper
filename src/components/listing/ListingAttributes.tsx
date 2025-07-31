@@ -6,22 +6,31 @@ type ListingAttributesType = {
 };
 
 export const ListingAttributes = ({ attributes }: ListingAttributesType) => {
-  return (
-    <div className="grid grid-cols-3 gap-2 text-gray-700">
-      {attributes.map((attribute) => {
-        if (attribute.trait_type === "Purchase Price") return;
+  const filteredAttributes = attributes.filter(
+    (attribute) => attribute.trait_type !== "Purchase Price"
+  );
 
+  return (
+    <ul
+      className="grid grid-cols-3 gap-2 text-gray-700"
+      aria-label="Property attributes"
+    >
+      {filteredAttributes.map((attribute) => {
         const Icon =
           iconByType[attribute.trait_type as keyof typeof iconByType];
         return (
-          <div key={attribute.trait_type} className="flex items-center gap-1">
-            {Icon && <Icon className="h-4 w-4" />}
+          <li
+            key={attribute.trait_type}
+            className="flex items-center gap-1"
+            role="listitem"
+          >
+            {Icon && <Icon className="h-4 w-4" aria-hidden="true" />}
             <span className="text-sm font-medium line-clamp-1">
               {attribute.value}
             </span>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 };

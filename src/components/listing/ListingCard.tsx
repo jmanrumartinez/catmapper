@@ -16,11 +16,14 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
   const price = attributes[0];
 
   return (
-    <Card className="w-full overflow-hidden shadow-lg border-0 bg-white py-0">
+    <Card
+      className="w-full overflow-hidden shadow-lg border-0 bg-white py-0 hover:shadow-xl transition-shadow duration-200"
+      aria-labelledby={`property-title-${id}`}
+    >
       <div className="relative">
         <Image
           src={image}
-          alt={description}
+          alt={`${description} - Property image`}
           width={400}
           height={240}
           priority
@@ -31,12 +34,15 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
       <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
         <div className="space-y-4">
           <div>
-            <h2 className="text-2xl font-bold text-purple-900 mb-1">
+            <h2
+              id={`property-title-${id}`}
+              className="text-2xl font-bold text-purple-900 mb-1"
+            >
               {price.value} ETH
             </h2>
             <p className="text-gray-600 text-sm flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {address}
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              <span>{address}</span>
             </p>
           </div>
 
@@ -47,6 +53,7 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
               variant="outline"
               className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 rounded-lg bg-transparent cursor-pointer"
               onClick={() => onClickViewMore(id)}
+              aria-label={`View details for property at ${address}`}
             >
               View Details
             </Button>

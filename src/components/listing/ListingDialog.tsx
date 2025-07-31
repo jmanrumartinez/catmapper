@@ -141,6 +141,7 @@ export const ListingDialog = ({
         <Button
           disabled
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          aria-label="Property has been bought"
         >
           Property bought
         </Button>
@@ -157,6 +158,7 @@ export const ListingDialog = ({
           onClick={handleBuy}
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
           disabled={propertyState.hasBeenBought}
+          aria-label={`Buy property at ${property.address} for ${price.value} ETH`}
         >
           Buy Now
         </Button>
@@ -173,6 +175,7 @@ export const ListingDialog = ({
           onClick={handleInspect}
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
           disabled={propertyState.hasBeenInspected}
+          aria-label="Approve property inspection"
         >
           Approve inspection
         </Button>
@@ -189,6 +192,7 @@ export const ListingDialog = ({
           onClick={handleSell}
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
           disabled={propertyState.hasBeenSold}
+          aria-label="Approve and sell property"
         >
           Approve & sell
         </Button>
@@ -205,6 +209,7 @@ export const ListingDialog = ({
           onClick={handleLend}
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
           disabled={propertyState.hasBeenLent}
+          aria-label="Approve and provide lending for property"
         >
           Approve & lend
         </Button>
@@ -218,78 +223,109 @@ export const ListingDialog = ({
         <DialogTitle className="text-2xl font-bold text-purple-900">
           {property.name}
         </DialogTitle>
-        <DialogDescription className="sr-only">
+        <DialogDescription>
           Property details for {property.name} located at {property.address}
         </DialogDescription>
 
         <div className="space-y-6">
-          <Image
-            src={property.image}
-            alt="Modern luxury home - detailed view"
-            width={600}
-            height={300}
-            className="w-full h-64 object-cover rounded-lg"
-          />
+          <div className="relative">
+            <Image
+              src={property.image}
+              alt={`${property.name} - Detailed property view`}
+              width={600}
+              height={300}
+              className="w-full h-64 object-cover rounded-lg"
+            />
+          </div>
 
-          <div>
-            <h3 className="text-3xl font-bold text-purple-900 mb-2">
+          <section aria-labelledby="property-price">
+            <h3
+              id="property-price"
+              className="text-3xl font-bold text-purple-900 mb-2"
+            >
               {price.value} ETH
             </h3>
             <p className="text-gray-600 flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              {property.address}
+              <MapPin className="h-4 w-4" aria-hidden="true" />
+              <span>{property.address}</span>
             </p>
-          </div>
+          </section>
 
-          <div className="grid grid-cols-3 gap-4 p-4 bg-purple-50 rounded-lg">
-            {restAttributes.slice(0, 3).map((attribute) => {
-              const Icon =
-                iconByType[attribute.trait_type as keyof typeof iconByType];
-
-              return (
-                <div key={attribute.trait_type} className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Icon className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <p className="font-semibold text-purple-900">
-                    {attribute.value}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="flex gap-3">
-            {Object.keys(stakeholders).length ? renderActionButton() : null}
-            <Button
-              variant="outline"
-              className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 bg-transparent  cursor-pointer"
+          <section aria-labelledby="property-highlights">
+            <h4 id="property-highlights" className="sr-only">
+              Property Highlights
+            </h4>
+            <ul
+              className="grid grid-cols-3 gap-4 p-4 bg-purple-50 rounded-lg"
+              aria-label="Property highlights"
             >
-              Contact Agent
-            </Button>
-          </div>
+              {restAttributes.slice(0, 3).map((attribute) => {
+                const Icon =
+                  iconByType[attribute.trait_type as keyof typeof iconByType];
+
+                return (
+                  <li key={attribute.trait_type} className="text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Icon
+                        className="h-5 w-5 text-purple-600"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <p className="font-semibold text-purple-900">
+                      {attribute.value}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          <section aria-labelledby="property-actions">
+            <h4 id="property-actions" className="sr-only">
+              Property Actions
+            </h4>
+            <div className="flex gap-3">
+              {Object.keys(stakeholders).length ? renderActionButton() : null}
+              <Button
+                variant="outline"
+                className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 bg-transparent cursor-pointer"
+                aria-label="Contact property agent"
+              >
+                Contact Agent
+              </Button>
+            </div>
+          </section>
 
           <Separator />
 
-          <div>
-            <h4 className="text-lg font-semibold text-purple-900 mb-3">
+          <section aria-labelledby="property-overview">
+            <h4
+              id="property-overview"
+              className="text-lg font-semibold text-purple-900 mb-3"
+            >
               Overview
             </h4>
             <p className="text-gray-700 leading-relaxed">
               {property.description}
             </p>
-          </div>
+          </section>
 
           <Separator />
 
-          <div>
-            <h4 className="text-lg font-semibold text-purple-900 mb-4">
+          <section aria-labelledby="property-details">
+            <h4
+              id="property-details"
+              className="text-lg font-semibold text-purple-900 mb-4"
+            >
               Property Details
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ul
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              aria-label="Detailed property information"
+            >
               {attributes.map((attribute) => {
                 return (
-                  <div
+                  <li
                     key={`${attribute.trait_type}-details`}
                     className="flex justify-between"
                   >
@@ -299,11 +335,11 @@ export const ListingDialog = ({
                     <span className="font-medium text-gray-900">
                       {attribute.value}
                     </span>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
-          </div>
+            </ul>
+          </section>
         </div>
       </DialogContent>
     </Dialog>
