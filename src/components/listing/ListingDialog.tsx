@@ -12,10 +12,19 @@ import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
 import { useCallback, useEffect, useState } from "react";
 import { areAddressesEqual } from "@/lib/utils";
-import { useAccount, useReadContract, useReadContracts } from "wagmi";
+import {
+  useAccount,
+  useReadContract,
+  useReadContracts,
+  useSendTransaction,
+  useWriteContract,
+} from "wagmi";
+
 import { useStakeHolders } from "@/hooks/useGetStakeholders";
 import { useGetPropertyState } from "@/hooks/useGetPropertyState";
 import EscrowAbi from "@consts/abis/Escrow.json";
+import { readContract } from "@wagmi/core";
+import { config } from "@/config/wagmi";
 
 type ListingDialogTypes = {
   isOpen: boolean;
@@ -34,25 +43,40 @@ export const ListingDialog = ({
   const { propertyState, refetch: refetchPropertyState } =
     useGetPropertyState(id);
 
-  const { data: hasOwner } = useReadContract({
+  const { data: isListed } = useReadContract({
     address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     abi: EscrowAbi,
-    functionName: "getBuyer",
+    functionName: "isListed",
     args: [id],
   });
+
+  const { writeContract } = useWriteContract();
 
   const [price, type, ...restAttributes] = attributes;
 
   const handleBuy = async () => {
-    // const escrowAmount = await escrow.getEscrowAmount(id);
-    // const signer = await provider.getSigner();
-    // let transaction = await escrow
-    //   .connect(signer)
-    //   .depositEscrow(id, { value: escrowAmount });
-    // await transaction.wait();
-    // transaction = await escrow.connect(signer).approveSale(id);
-    // await transaction.wait();
-    // refetchPropertyState();
+    const escrowAmount = await readContract(config, {
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "getEscrowAmount",
+      args: [id],
+    });
+
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "depositEscrow",
+      args: [id, { value: escrowAmount }],
+    });
+
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "approveSale",
+      args: [id],
+    });
+
+    refetchPropertyState();
   };
   const handleInspect = async () => {
     // const signer = await provider.getSigner();
@@ -86,13 +110,13 @@ export const ListingDialog = ({
 
   // TODO: Please refactor this!!! This is so ugly lol
   const renderActionButton = () => {
-    if (hasOwner) {
+    if (!isListed) {
       return (
         <Button
           disabled
           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
         >
-          Property owned
+          Property bought
         </Button>
       );
     }
