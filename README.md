@@ -28,10 +28,10 @@ A decentralized real estate marketplace built on Ethereum blockchain that allows
 
 ### Blockchain & Smart Contracts
 
-- **Solidity 0.8.20** - Smart contract development
-- **Hardhat 2.26.1** - Ethereum development environment
-- **OpenZeppelin 5.4.0** - Secure smart contract libraries
-- **Ethers.js 6.15.0** - Ethereum library for JavaScript
+- **Solidity** - Smart contract development
+- **Hardhat** - Ethereum development environment
+- **OpenZeppelin** - Secure smart contract libraries
+- **Ethers.js** - Ethereum library for JavaScript
 
 ### Development Tools
 
