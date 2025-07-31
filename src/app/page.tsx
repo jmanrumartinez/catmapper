@@ -5,16 +5,17 @@ import { NavigationBar } from "@/components/shared/navigation/NavigationBar";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import config from "@/consts/config.json";
-import RealEstateAbi from "@consts/abis/RealEstate.json";
+
 import EscrowAbi from "@consts/abis/Escrow.json";
 import { ListingDialog } from "@/components/listing/ListingDialog";
 import { PropertyType } from "@/types/listing";
+import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 
 export default function Home() {
+  const totalSupply = useGetTotalSupply();
   const [provider, setProvider] = useState<ethers.BrowserProvider>();
 
   // Page data
-  const [totalSupply, setTotalSupply] = useState<number>(0);
   const [escrow, setEscrow] = useState<ethers.Contract>();
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
@@ -33,13 +34,7 @@ export default function Home() {
 
       const network = await provider.getNetwork();
 
-      const realEstate = new ethers.Contract(
-        config[network.chainId].realEstate.address,
-        RealEstateAbi,
-        provider
-      );
-      const totalSupply = await realEstate.totalSupply();
-      setTotalSupply(totalSupply);
+      const totalSupply = 3; // replace this
 
       const propertiesToLoad = [];
       for (let i = 1; i <= totalSupply; i++) {
