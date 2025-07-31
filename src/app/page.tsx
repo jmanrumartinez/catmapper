@@ -11,7 +11,6 @@ import { ListingDialog } from "@/components/listing/ListingDialog";
 import { PropertyType } from "@/types/listing";
 
 export default function Home() {
-  const [account, setAccount] = useState<string | undefined>();
   const [provider, setProvider] = useState<ethers.BrowserProvider>();
 
   // Page data
@@ -22,10 +21,6 @@ export default function Home() {
   // Dialog
   const [isPropertyDialogVisible, setIsPropertyDialogVisible] = useState(false);
   const [propertySelected, setPropertySelected] = useState<PropertyType>();
-
-  const handleConnectAccount = (account: string) => {
-    setAccount(account);
-  };
 
   useEffect(() => {
     const initializeConnection = async () => {
@@ -65,13 +60,6 @@ export default function Home() {
       setEscrow(escrow);
     };
 
-    window.ethereum.on("accountsChanged", async () => {
-      const [account] = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      handleConnectAccount(account);
-    });
     initializeConnection();
   }, []);
 
@@ -99,10 +87,9 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {propertySelected && escrow && account && provider ? (
+      {propertySelected && escrow && provider ? (
         <ListingDialog
           provider={provider}
-          account={account}
           escrow={escrow}
           property={propertySelected}
           isOpen={isPropertyDialogVisible}

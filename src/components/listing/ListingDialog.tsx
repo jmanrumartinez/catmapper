@@ -13,13 +13,13 @@ import { iconByType } from "@/consts/listing";
 import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { areAddressesEqual } from "@/lib/utils";
+import { useAccount } from "wagmi";
 
 type ListingDialogTypes = {
   isOpen: boolean;
   onOpenChange: (value: boolean) => void;
   property: PropertyType;
   escrow: ethers.Contract;
-  account: string;
   provider: ethers.BrowserProvider;
 };
 
@@ -28,9 +28,10 @@ export const ListingDialog = ({
   isOpen,
   onOpenChange,
   property,
-  account,
   provider,
 }: ListingDialogTypes) => {
+  const account = useAccount();
+
   const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
   const { attributes, id } = property;
   const [price, type, ...restAttributes] = attributes;
@@ -157,7 +158,10 @@ export const ListingDialog = ({
       );
     }
 
-    if (areAddressesEqual(account, stakeholders.buyer)) {
+    if (
+      account.address &&
+      areAddressesEqual(account.address, stakeholders.buyer)
+    ) {
       return (
         <Button
           onClick={handleBuy}
@@ -169,7 +173,10 @@ export const ListingDialog = ({
       );
     }
 
-    if (areAddressesEqual(account, stakeholders.inspector)) {
+    if (
+      account.address &&
+      areAddressesEqual(account.address, stakeholders.inspector)
+    ) {
       return (
         <Button
           onClick={handleInspect}
@@ -181,7 +188,10 @@ export const ListingDialog = ({
       );
     }
 
-    if (areAddressesEqual(account, stakeholders.seller)) {
+    if (
+      account.address &&
+      areAddressesEqual(account.address, stakeholders.seller)
+    ) {
       return (
         <Button
           onClick={handleSell}
@@ -193,7 +203,10 @@ export const ListingDialog = ({
       );
     }
 
-    if (areAddressesEqual(account, stakeholders.lender)) {
+    if (
+      account.address &&
+      areAddressesEqual(account.address, stakeholders.lender)
+    ) {
       return (
         <Button
           onClick={handleLend}
