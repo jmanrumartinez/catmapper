@@ -1,17 +1,19 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import config from "@/consts/config.json";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const trimAccountHash = (accountHash: string): string => {
-  return accountHash.slice(0, 7) + "..." + accountHash.slice(37, 42);
-};
+export function areAddressesEqual(address1: string, address2: string): boolean {
+  return address1.toLowerCase() === address2.toLowerCase();
+}
 
-export const areAddressesEqual = (
-  address1: string,
-  address2: string
-): boolean => {
-  return address1.toLocaleLowerCase() === address2.toLocaleLowerCase();
-};
+export function getContractAddress(
+  contractName: "realEstate" | "escrow"
+): `0x${string}` {
+  const chainId = "31337"; // hardhat localhost
+  return config[chainId as keyof typeof config][contractName]
+    .address as `0x${string}`;
+}

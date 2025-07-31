@@ -1,10 +1,13 @@
 import { useReadContracts } from "wagmi";
 import { useStakeHolders } from "./useGetStakeholders";
+import { getContractAddress } from "@/lib/utils";
 import EscrowAbi from "@consts/abis/Escrow.json";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
+const escrowAddress = getContractAddress("escrow") as `0x${string}`;
+
 const baseEscrowContract = {
-  address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512" as `0x${string}`,
+  address: escrowAddress,
   abi: EscrowAbi,
 };
 
@@ -51,11 +54,12 @@ export const useGetPropertyState = (
       },
     ],
     query: {
-      enabled:
+      enabled: Boolean(
         stakeholders.buyer &&
-        stakeholders.seller &&
-        stakeholders.lender &&
-        stakeholders.inspector,
+          stakeholders.seller &&
+          stakeholders.lender &&
+          stakeholders.inspector
+      ),
     },
   });
   const [

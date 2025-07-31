@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { readContract } from "@wagmi/core";
 import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 import { config } from "@/config/wagmi";
+import { getContractAddress } from "@/lib/utils";
 
 export const useGetProperties = () => {
   const { totalSupply } = useGetTotalSupply();
@@ -16,7 +17,7 @@ export const useGetProperties = () => {
     for (let i = 1; i <= totalSupply; i++) {
       const uri = await readContract(config, {
         abi: RealEstateAbi,
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: getContractAddress("realEstate"),
         functionName: "tokenURI",
         args: [i],
       });

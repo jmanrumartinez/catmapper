@@ -10,7 +10,7 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
-import { areAddressesEqual } from "@/lib/utils";
+import { areAddressesEqual, getContractAddress } from "@/lib/utils";
 import {
   useAccount,
   useReadContract,
@@ -42,7 +42,7 @@ export const ListingDialog = ({
     useGetPropertyState(id);
 
   const { data: isListed } = useReadContract({
-    address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    address: getContractAddress("escrow") as `0x${string}`,
     abi: EscrowAbi,
     functionName: "isListed",
     args: [id],
@@ -55,21 +55,24 @@ export const ListingDialog = ({
 
   const handleBuy = async () => {
     const escrowAmount = await readContract(config, {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "getEscrowAmount",
       args: [id],
     });
 
+    console.log("escrowAmount", escrowAmount);
+
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "depositEscrow",
-      args: [id, { value: escrowAmount }],
+      args: [id],
+      value: escrowAmount as bigint,
     });
 
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "approveSale",
       args: [id],
@@ -79,7 +82,7 @@ export const ListingDialog = ({
   };
   const handleInspect = async () => {
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "setInspectionStatus",
       args: [id, true],
@@ -89,20 +92,20 @@ export const ListingDialog = ({
   };
   const handleLend = async () => {
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "approveSale",
       args: [id],
     });
 
     const escrowAmount = await readContract(config, {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "getEscrowAmount",
       args: [id],
     });
     const purchasePrice = await readContract(config, {
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "getPurchasePrice",
       args: [id],
@@ -111,7 +114,7 @@ export const ListingDialog = ({
     const lendAmount = (purchasePrice as bigint) - (escrowAmount as bigint);
 
     sendTransaction({
-      to: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      to: getContractAddress("escrow") as `0x${string}`,
       value: lendAmount,
     });
 
@@ -119,14 +122,14 @@ export const ListingDialog = ({
   };
   const handleSell = async () => {
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "approveSale",
       args: [id],
     });
 
     writeContract({
-      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      address: getContractAddress("escrow") as `0x${string}`,
       abi: EscrowAbi,
       functionName: "finalizeSale",
       args: [id],
