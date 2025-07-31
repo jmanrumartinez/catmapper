@@ -12,8 +12,10 @@ import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
 import { useCallback, useEffect, useState } from "react";
 import { areAddressesEqual } from "@/lib/utils";
-import { useAccount, useReadContracts } from "wagmi";
+import { useAccount, useReadContract, useReadContracts } from "wagmi";
 import { useStakeHolders } from "@/hooks/useGetStakeholders";
+import { useGetPropertyState } from "@/hooks/useGetPropertyState";
+import EscrowAbi from "@consts/abis/Escrow.json";
 
 type ListingDialogTypes = {
   isOpen: boolean;
@@ -26,198 +28,140 @@ export const ListingDialog = ({
   onOpenChange,
   property,
 }: ListingDialogTypes) => {
+  const { attributes, id } = property;
   const account = useAccount();
-  const { stakeholders } = useStakeHolders(property.id);
+  const { stakeholders } = useStakeHolders(id);
+  const { propertyState, refetch: refetchPropertyState } =
+    useGetPropertyState(id);
 
-  //   const { data: propertyState } = useReadContracts({
-  //     contracts: [
-  //       {
-  //         ...baseEscrowContract,
-  //         functionName: "hasApproved",
-  //         args: [buyer],
-  //       },
-  //       {
-  //         ...baseEscrowContract,
-  //         functionName: "hasApproved",
-  //         args: [lender],
-  //       },
-  //       {
-  //         ...baseEscrowContract,
-  //         functionName: "hasPassedInspection",
-  //         args: [id],
-  //       },
-  //       {
-  //         ...baseEscrowContract,
-  //         functionName: "hasApproved",
-  //         args: [seller],
-  //       },
-  //     ],
-  //     query: {
-  //       enabled: buyer && seller && lender && inspector,
-  //     },
-  //   });
-  //   const [hasBought, hasLended, hasInspected, hasSold] = propertyState;
+  const { data: hasOwner } = useReadContract({
+    address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    abi: EscrowAbi,
+    functionName: "getBuyer",
+    args: [id],
+  });
 
-  //   const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
-  //   const { attributes, id } = property;
-  //   const [price, type, ...restAttributes] = attributes;
-  //   const [propertyState, setPropertyState] = useState<Record<string, boolean>>(
-  //     {}
-  //   );
+  const [price, type, ...restAttributes] = attributes;
 
-  //   const fetchOwner = useCallback(async () => {
-  //     const isListed = await escrow.isListed(id);
-  //     if (isListed) return;
+  const handleBuy = async () => {
+    // const escrowAmount = await escrow.getEscrowAmount(id);
+    // const signer = await provider.getSigner();
+    // let transaction = await escrow
+    //   .connect(signer)
+    //   .depositEscrow(id, { value: escrowAmount });
+    // await transaction.wait();
+    // transaction = await escrow.connect(signer).approveSale(id);
+    // await transaction.wait();
+    // refetchPropertyState();
+  };
+  const handleInspect = async () => {
+    // const signer = await provider.getSigner();
+    // const transaction = await escrow
+    //   .connect(signer)
+    //   .setInspectionStatus(id, true);
+    // await transaction.wait();
+    // refetchPropertyState();
+  };
+  const handleLend = async () => {
+    // const signer = await provider.getSigner();
+    // const transaction = await escrow.connect(signer).approveSale(id);
+    // await transaction.wait();
+    // const lendAmount =
+    //   (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
+    // await signer.sendTransaction({
+    //   to: await escrow.getAddress(),
+    //   value: lendAmount.toString(),
+    //   gasLimit: 60000,
+    // });
+    // refetchPropertyState();
+  };
+  const handleSell = async () => {
+    // const signer = await provider.getSigner();
+    // let transaction = await escrow.connect(signer).approveSale(id);
+    // await transaction.wait();
+    // transaction = await escrow.connect(signer).finalizeSale(id);
+    // await transaction.wait();
+    // refetchPropertyState();
+  };
 
-  //     const owner = await escrow.getBuyer(id);
-  //     setStakeholders((prevStakeholders) => ({
-  //       ...prevStakeholders,
-  //       owner,
-  //     }));
-  //   }, [escrow, id]);
+  // TODO: Please refactor this!!! This is so ugly lol
+  const renderActionButton = () => {
+    if (hasOwner) {
+      return (
+        <Button
+          disabled
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+        >
+          Property owned
+        </Button>
+      );
+    }
 
-  //   useEffect(() => {
-  //     fetchOwner();
-  //   }, [initializeData, fetchOwner]);
+    if (
+      account.address &&
+      stakeholders?.buyer &&
+      areAddressesEqual(account.address, stakeholders.buyer)
+    ) {
+      return (
+        <Button
+          onClick={handleBuy}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasBeenBought}
+        >
+          Buy Now
+        </Button>
+      );
+    }
 
-  //   const handleBuy = async () => {
-  //     const escrowAmount = await escrow.getEscrowAmount(id);
-  //     const signer = await provider.getSigner();
+    if (
+      account.address &&
+      stakeholders.inspector &&
+      areAddressesEqual(account.address, stakeholders.inspector)
+    ) {
+      return (
+        <Button
+          onClick={handleInspect}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasBeenInspected}
+        >
+          Approve inspection
+        </Button>
+      );
+    }
 
-  //     let transaction = await escrow
-  //       .connect(signer)
-  //       .depositEscrow(id, { value: escrowAmount });
-  //     await transaction.wait();
+    if (
+      account.address &&
+      stakeholders.seller &&
+      areAddressesEqual(account.address, stakeholders.seller)
+    ) {
+      return (
+        <Button
+          onClick={handleSell}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasBeenSold}
+        >
+          Approve & sell
+        </Button>
+      );
+    }
 
-  //     transaction = await escrow.connect(signer).approveSale(id);
-  //     await transaction.wait();
+    if (
+      account.address &&
+      stakeholders.lender &&
+      areAddressesEqual(account.address, stakeholders.lender)
+    ) {
+      return (
+        <Button
+          onClick={handleLend}
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+          disabled={propertyState.hasBeenLent}
+        >
+          Approve & lend
+        </Button>
+      );
+    }
+  };
 
-  //     setPropertyState((prevState) => ({
-  //       ...prevState,
-  //       hasBought: true,
-  //     }));
-  //   };
-  //   const handleInspect = async () => {
-  //     const signer = await provider.getSigner();
-
-  //     const transaction = await escrow
-  //       .connect(signer)
-  //       .setInspectionStatus(id, true);
-  //     await transaction.wait();
-
-  //     setPropertyState((prevState) => ({
-  //       ...prevState,
-  //       hasInspected: true,
-  //     }));
-  //   };
-  //   const handleLend = async () => {
-  //     const signer = await provider.getSigner();
-  //     const transaction = await escrow.connect(signer).approveSale(id);
-  //     await transaction.wait();
-
-  //     const lendAmount =
-  //       (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
-
-  //     await signer.sendTransaction({
-  //       to: await escrow.getAddress(),
-  //       value: lendAmount.toString(),
-  //       gasLimit: 60000,
-  //     });
-
-  //     setPropertyState((prevState) => ({
-  //       ...prevState,
-  //       hasLended: true,
-  //     }));
-  //   };
-  //   const handleSell = async () => {
-  //     const signer = await provider.getSigner();
-  //     let transaction = await escrow.connect(signer).approveSale(id);
-  //     await transaction.wait();
-
-  //     transaction = await escrow.connect(signer).finalizeSale(id);
-  //     await transaction.wait();
-
-  //     setPropertyState((prevState) => ({
-  //       ...prevState,
-  //       hasSold: true,
-  //     }));
-  //   };
-
-  //   // TODO: Please refactor this!!! This is so ugly lol
-  //   const renderActionButton = () => {
-  //     if (stakeholders.owner) {
-  //       return (
-  //         <Button
-  //           disabled
-  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-  //         >
-  //           Property owned
-  //         </Button>
-  //       );
-  //     }
-
-  //     if (
-  //       account.address &&
-  //       areAddressesEqual(account.address, stakeholders.buyer)
-  //     ) {
-  //       return (
-  //         <Button
-  //           onClick={handleBuy}
-  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-  //           disabled={propertyState.hasBought}
-  //         >
-  //           Buy Now
-  //         </Button>
-  //       );
-  //     }
-
-  //     if (
-  //       account.address &&
-  //       areAddressesEqual(account.address, stakeholders.inspector)
-  //     ) {
-  //       return (
-  //         <Button
-  //           onClick={handleInspect}
-  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-  //           disabled={propertyState.hasInspected}
-  //         >
-  //           Approve inspection
-  //         </Button>
-  //       );
-  //     }
-
-  //     if (
-  //       account.address &&
-  //       areAddressesEqual(account.address, stakeholders.seller)
-  //     ) {
-  //       return (
-  //         <Button
-  //           onClick={handleSell}
-  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-  //           disabled={propertyState.hasSold}
-  //         >
-  //           Approve & sell
-  //         </Button>
-  //       );
-  //     }
-
-  //     if (
-  //       account.address &&
-  //       areAddressesEqual(account.address, stakeholders.lender)
-  //     ) {
-  //       return (
-  //         <Button
-  //           onClick={handleLend}
-  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-  //           disabled={propertyState.hasLended}
-  //         >
-  //           Approve & lend
-  //         </Button>
-  //       );
-  //     }
-  //   };
-
-  return <p>hola</p>;
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
