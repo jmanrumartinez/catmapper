@@ -3,7 +3,7 @@ import { hardhat } from "wagmi/chains";
 
 const config = getDefaultConfig({
   appName: "Catmapper",
-  projectId: process.env.REOWN_PROJECT_ID ?? "",
+  projectId: process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "",
   chains: [hardhat],
   ssr: true,
 });
