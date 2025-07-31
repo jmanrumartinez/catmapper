@@ -2,18 +2,15 @@
 
 import { ListingCard } from "@/components/listing/ListingCard";
 import { NavigationBar } from "@/components/shared/navigation/NavigationBar";
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import config from "@/consts/config.json";
+import { useState } from "react";
 
-import EscrowAbi from "@consts/abis/Escrow.json";
 import { ListingDialog } from "@/components/listing/ListingDialog";
 import { PropertyType } from "@/types/listing";
 import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 import { useGetProperties } from "@/hooks/useGetProperties";
 
 export default function Home() {
-  const totalSupply = useGetTotalSupply();
+  const { totalSupply } = useGetTotalSupply();
   const { properties } = useGetProperties();
 
   // Dialog
