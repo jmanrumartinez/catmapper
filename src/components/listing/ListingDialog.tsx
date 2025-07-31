@@ -10,10 +10,10 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
-import { ethers } from "ethers";
 import { useCallback, useEffect, useState } from "react";
 import { areAddressesEqual } from "@/lib/utils";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContracts } from "wagmi";
+import { useStakeHolders } from "@/hooks/useGetStakeholders";
 
 type ListingDialogTypes = {
   isOpen: boolean;
@@ -27,192 +27,197 @@ export const ListingDialog = ({
   property,
 }: ListingDialogTypes) => {
   const account = useAccount();
+  const { stakeholders } = useStakeHolders(property.id);
 
-  const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
-  const { attributes, id } = property;
-  const [price, type, ...restAttributes] = attributes;
-  const [propertyState, setPropertyState] = useState<Record<string, boolean>>(
-    {}
-  );
+  //   const { data: propertyState } = useReadContracts({
+  //     contracts: [
+  //       {
+  //         ...baseEscrowContract,
+  //         functionName: "hasApproved",
+  //         args: [buyer],
+  //       },
+  //       {
+  //         ...baseEscrowContract,
+  //         functionName: "hasApproved",
+  //         args: [lender],
+  //       },
+  //       {
+  //         ...baseEscrowContract,
+  //         functionName: "hasPassedInspection",
+  //         args: [id],
+  //       },
+  //       {
+  //         ...baseEscrowContract,
+  //         functionName: "hasApproved",
+  //         args: [seller],
+  //       },
+  //     ],
+  //     query: {
+  //       enabled: buyer && seller && lender && inspector,
+  //     },
+  //   });
+  //   const [hasBought, hasLended, hasInspected, hasSold] = propertyState;
 
-  const fetchOwner = useCallback(async () => {
-    const isListed = await escrow.isListed(id);
-    if (isListed) return;
+  //   const [stakeholders, setStakeholders] = useState<Record<string, string>>({});
+  //   const { attributes, id } = property;
+  //   const [price, type, ...restAttributes] = attributes;
+  //   const [propertyState, setPropertyState] = useState<Record<string, boolean>>(
+  //     {}
+  //   );
 
-    const owner = await escrow.getBuyer(id);
-    setStakeholders((prevStakeholders) => ({
-      ...prevStakeholders,
-      owner,
-    }));
-  }, [escrow, id]);
+  //   const fetchOwner = useCallback(async () => {
+  //     const isListed = await escrow.isListed(id);
+  //     if (isListed) return;
 
-  const initializeData = useCallback(async () => {
-    const buyer = await escrow.getBuyer(id);
-    const seller = await escrow.seller();
-    const lender = await escrow.lender();
-    const inspector = await escrow.inspector();
+  //     const owner = await escrow.getBuyer(id);
+  //     setStakeholders((prevStakeholders) => ({
+  //       ...prevStakeholders,
+  //       owner,
+  //     }));
+  //   }, [escrow, id]);
 
-    setStakeholders({
-      buyer,
-      seller,
-      lender,
-      inspector,
-    });
+  //   useEffect(() => {
+  //     fetchOwner();
+  //   }, [initializeData, fetchOwner]);
 
-    const hasBought = await escrow.hasApproved(id, buyer);
-    const hasLended = await escrow.hasApproved(id, lender);
-    const hasInspected = await escrow.hasPassedInspection(id);
-    const hasSold = await escrow.hasApproved(id, seller);
+  //   const handleBuy = async () => {
+  //     const escrowAmount = await escrow.getEscrowAmount(id);
+  //     const signer = await provider.getSigner();
 
-    setPropertyState({
-      hasBought,
-      hasLended,
-      hasInspected,
-      hasSold,
-    });
-  }, [escrow, id]);
+  //     let transaction = await escrow
+  //       .connect(signer)
+  //       .depositEscrow(id, { value: escrowAmount });
+  //     await transaction.wait();
 
-  useEffect(() => {
-    initializeData().then(() => fetchOwner());
-  }, [initializeData, fetchOwner]);
+  //     transaction = await escrow.connect(signer).approveSale(id);
+  //     await transaction.wait();
 
-  const handleBuy = async () => {
-    const escrowAmount = await escrow.getEscrowAmount(id);
-    const signer = await provider.getSigner();
+  //     setPropertyState((prevState) => ({
+  //       ...prevState,
+  //       hasBought: true,
+  //     }));
+  //   };
+  //   const handleInspect = async () => {
+  //     const signer = await provider.getSigner();
 
-    let transaction = await escrow
-      .connect(signer)
-      .depositEscrow(id, { value: escrowAmount });
-    await transaction.wait();
+  //     const transaction = await escrow
+  //       .connect(signer)
+  //       .setInspectionStatus(id, true);
+  //     await transaction.wait();
 
-    transaction = await escrow.connect(signer).approveSale(id);
-    await transaction.wait();
+  //     setPropertyState((prevState) => ({
+  //       ...prevState,
+  //       hasInspected: true,
+  //     }));
+  //   };
+  //   const handleLend = async () => {
+  //     const signer = await provider.getSigner();
+  //     const transaction = await escrow.connect(signer).approveSale(id);
+  //     await transaction.wait();
 
-    setPropertyState((prevState) => ({
-      ...prevState,
-      hasBought: true,
-    }));
-  };
-  const handleInspect = async () => {
-    const signer = await provider.getSigner();
+  //     const lendAmount =
+  //       (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
 
-    const transaction = await escrow
-      .connect(signer)
-      .setInspectionStatus(id, true);
-    await transaction.wait();
+  //     await signer.sendTransaction({
+  //       to: await escrow.getAddress(),
+  //       value: lendAmount.toString(),
+  //       gasLimit: 60000,
+  //     });
 
-    setPropertyState((prevState) => ({
-      ...prevState,
-      hasInspected: true,
-    }));
-  };
-  const handleLend = async () => {
-    const signer = await provider.getSigner();
-    const transaction = await escrow.connect(signer).approveSale(id);
-    await transaction.wait();
+  //     setPropertyState((prevState) => ({
+  //       ...prevState,
+  //       hasLended: true,
+  //     }));
+  //   };
+  //   const handleSell = async () => {
+  //     const signer = await provider.getSigner();
+  //     let transaction = await escrow.connect(signer).approveSale(id);
+  //     await transaction.wait();
 
-    const lendAmount =
-      (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
+  //     transaction = await escrow.connect(signer).finalizeSale(id);
+  //     await transaction.wait();
 
-    await signer.sendTransaction({
-      to: await escrow.getAddress(),
-      value: lendAmount.toString(),
-      gasLimit: 60000,
-    });
+  //     setPropertyState((prevState) => ({
+  //       ...prevState,
+  //       hasSold: true,
+  //     }));
+  //   };
 
-    setPropertyState((prevState) => ({
-      ...prevState,
-      hasLended: true,
-    }));
-  };
-  const handleSell = async () => {
-    const signer = await provider.getSigner();
-    let transaction = await escrow.connect(signer).approveSale(id);
-    await transaction.wait();
+  //   // TODO: Please refactor this!!! This is so ugly lol
+  //   const renderActionButton = () => {
+  //     if (stakeholders.owner) {
+  //       return (
+  //         <Button
+  //           disabled
+  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+  //         >
+  //           Property owned
+  //         </Button>
+  //       );
+  //     }
 
-    transaction = await escrow.connect(signer).finalizeSale(id);
-    await transaction.wait();
+  //     if (
+  //       account.address &&
+  //       areAddressesEqual(account.address, stakeholders.buyer)
+  //     ) {
+  //       return (
+  //         <Button
+  //           onClick={handleBuy}
+  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+  //           disabled={propertyState.hasBought}
+  //         >
+  //           Buy Now
+  //         </Button>
+  //       );
+  //     }
 
-    setPropertyState((prevState) => ({
-      ...prevState,
-      hasSold: true,
-    }));
-  };
+  //     if (
+  //       account.address &&
+  //       areAddressesEqual(account.address, stakeholders.inspector)
+  //     ) {
+  //       return (
+  //         <Button
+  //           onClick={handleInspect}
+  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+  //           disabled={propertyState.hasInspected}
+  //         >
+  //           Approve inspection
+  //         </Button>
+  //       );
+  //     }
 
-  // TODO: Please refactor this!!! This is so ugly lol
-  const renderActionButton = () => {
-    if (stakeholders.owner) {
-      return (
-        <Button
-          disabled
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-        >
-          Property owned
-        </Button>
-      );
-    }
+  //     if (
+  //       account.address &&
+  //       areAddressesEqual(account.address, stakeholders.seller)
+  //     ) {
+  //       return (
+  //         <Button
+  //           onClick={handleSell}
+  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+  //           disabled={propertyState.hasSold}
+  //         >
+  //           Approve & sell
+  //         </Button>
+  //       );
+  //     }
 
-    if (
-      account.address &&
-      areAddressesEqual(account.address, stakeholders.buyer)
-    ) {
-      return (
-        <Button
-          onClick={handleBuy}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasBought}
-        >
-          Buy Now
-        </Button>
-      );
-    }
+  //     if (
+  //       account.address &&
+  //       areAddressesEqual(account.address, stakeholders.lender)
+  //     ) {
+  //       return (
+  //         <Button
+  //           onClick={handleLend}
+  //           className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+  //           disabled={propertyState.hasLended}
+  //         >
+  //           Approve & lend
+  //         </Button>
+  //       );
+  //     }
+  //   };
 
-    if (
-      account.address &&
-      areAddressesEqual(account.address, stakeholders.inspector)
-    ) {
-      return (
-        <Button
-          onClick={handleInspect}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasInspected}
-        >
-          Approve inspection
-        </Button>
-      );
-    }
-
-    if (
-      account.address &&
-      areAddressesEqual(account.address, stakeholders.seller)
-    ) {
-      return (
-        <Button
-          onClick={handleSell}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasSold}
-        >
-          Approve & sell
-        </Button>
-      );
-    }
-
-    if (
-      account.address &&
-      areAddressesEqual(account.address, stakeholders.lender)
-    ) {
-      return (
-        <Button
-          onClick={handleLend}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasLended}
-        >
-          Approve & lend
-        </Button>
-      );
-    }
-  };
-
+  return <p>hola</p>;
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
