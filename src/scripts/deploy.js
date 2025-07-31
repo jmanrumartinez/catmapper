@@ -46,9 +46,9 @@ async function main() {
   await Promise.all(approvePromises);
 
   const pricePerIndex = {
-    0: 20,
-    1: 15,
-    2: 10
+    0: "20",
+    1: "15",
+    2: "10"
   }
 
   const listPromises = Array.from({ length: 3 }, () => null).map(async (_, index) => {
