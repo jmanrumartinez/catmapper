@@ -8,11 +8,13 @@ import { getContractAddress } from "@/lib/utils";
 
 export const useGetProperties = () => {
   const { totalSupply } = useGetTotalSupply();
+  const [isLoading, setIsLoading] = useState<boolean | undefined>();
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
   const fetchProperties = useCallback(async () => {
     if (!totalSupply) return;
     const propertiesToLoad = [];
+    setIsLoading(true);
 
     for (let i = 1; i <= totalSupply; i++) {
       const uri = await readContract(config, {
@@ -29,11 +31,12 @@ export const useGetProperties = () => {
     }
 
     setProperties(propertiesToLoad);
+    setIsLoading(false);
   }, [totalSupply]);
 
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
 
-  return { properties };
+  return { properties, isLoading };
 };

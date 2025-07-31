@@ -8,10 +8,11 @@ import { ListingDialog } from "@/components/listing/ListingDialog";
 import { PropertyType } from "@/types/listing";
 import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 import { useGetProperties } from "@/hooks/useGetProperties";
+import { ListingCardSkeleton } from "@/components/listing/ListingCardSkeleton";
 
 export default function Home() {
   const { totalSupply } = useGetTotalSupply();
-  const { properties } = useGetProperties();
+  const { properties, isLoading: isLoadingProperties } = useGetProperties();
 
   // Dialog
   const [isPropertyDialogVisible, setIsPropertyDialogVisible] = useState(false);
@@ -24,6 +25,21 @@ export default function Home() {
     });
   };
 
+  const getListingList = () => {
+    if (isLoadingProperties) {
+      return Array.from({ length: 3 }).map((_, i) => (
+        <ListingCardSkeleton key={i} />
+      ));
+    }
+    return properties.map((property) => (
+      <ListingCard
+        key={property.id}
+        property={property}
+        onClickViewMore={handleClickViewMore}
+      />
+    ));
+  };
+
   return (
     <div>
       <NavigationBar />
@@ -32,13 +48,7 @@ export default function Home() {
           {totalSupply} available properties for you
         </h3>
         <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(min(100%,350px),1fr))]">
-          {properties.map((property) => (
-            <ListingCard
-              key={property.id}
-              property={property}
-              onClickViewMore={handleClickViewMore}
-            />
-          ))}
+          {getListingList()}
         </div>
       </div>
       {propertySelected ? (
