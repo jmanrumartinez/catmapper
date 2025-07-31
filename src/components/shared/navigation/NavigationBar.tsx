@@ -6,12 +6,6 @@ export const NavigationBar = () => {
     <nav className="w-full">
       <div className="mx-auto max-w-7xl py-8 flex items-center justify-between">
         <div className="flex justify-center items-center">
-          <Image
-            src="logo.svg"
-            width={125}
-            height={62}
-            alt="Logo of Catmapper"
-          />
           <h1 className="text-purple-600 text-4xl font-bold">Catmapper</h1>
         </div>
 

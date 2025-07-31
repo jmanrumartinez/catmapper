@@ -2,6 +2,8 @@
 
 A decentralized real estate marketplace built on Ethereum blockchain that allows users to tokenize, buy, sell, and trade real estate properties as NFTs with integrated escrow functionality.
 
+![Quick Preview](./quick_preview.png)
+
 ### Key Features
 
 - **NFT Property Tokenization**: Convert real estate properties into tradeable NFTs using ERC721 standard
