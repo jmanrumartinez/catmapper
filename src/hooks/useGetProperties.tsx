@@ -6,7 +6,7 @@ import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 import { config } from "@/config/wagmi";
 
 export const useGetProperties = () => {
-  const totalSupply = useGetTotalSupply();
+  const { totalSupply } = useGetTotalSupply();
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
   const fetchProperties = useCallback(async () => {
