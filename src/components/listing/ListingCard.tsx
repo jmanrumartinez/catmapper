@@ -16,7 +16,7 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
   const price = attributes[0];
 
   return (
-    <Card className="w-full max-w-sm overflow-hidden shadow-lg border-0 bg-white py-0">
+    <Card className="w-full overflow-hidden shadow-lg border-0 bg-white py-0">
       <div className="relative">
         <Image
           src={image}
