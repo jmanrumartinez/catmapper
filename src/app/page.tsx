@@ -50,7 +50,6 @@ export default function Home() {
       }
 
       setProperties(propertiesToLoad);
-      console.log("propertiesToLoad", propertiesToLoad);
 
       const escrow = new ethers.Contract(
         config[network.chainId].escrow.address,
