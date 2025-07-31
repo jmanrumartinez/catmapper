@@ -19,16 +19,12 @@ type ListingDialogTypes = {
   isOpen: boolean;
   onOpenChange: (value: boolean) => void;
   property: PropertyType;
-  escrow: ethers.Contract;
-  provider: ethers.BrowserProvider;
 };
 
 export const ListingDialog = ({
-  escrow,
   isOpen,
   onOpenChange,
   property,
-  provider,
 }: ListingDialogTypes) => {
   const account = useAccount();
 

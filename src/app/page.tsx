@@ -10,52 +10,15 @@ import EscrowAbi from "@consts/abis/Escrow.json";
 import { ListingDialog } from "@/components/listing/ListingDialog";
 import { PropertyType } from "@/types/listing";
 import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
+import { useGetProperties } from "@/hooks/useGetProperties";
 
 export default function Home() {
   const totalSupply = useGetTotalSupply();
-  const [provider, setProvider] = useState<ethers.BrowserProvider>();
-
-  // Page data
-  const [escrow, setEscrow] = useState<ethers.Contract>();
-  const [properties, setProperties] = useState<PropertyType[]>([]);
+  const { properties } = useGetProperties();
 
   // Dialog
   const [isPropertyDialogVisible, setIsPropertyDialogVisible] = useState(false);
   const [propertySelected, setPropertySelected] = useState<PropertyType>();
-
-  useEffect(() => {
-    const initializeConnection = async () => {
-      if (!window.ethereum) {
-        return;
-      }
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      setProvider(provider);
-
-      const network = await provider.getNetwork();
-
-      const totalSupply = 3; // replace this
-
-      const propertiesToLoad = [];
-      for (let i = 1; i <= totalSupply; i++) {
-        const uri = await realEstate.tokenURI(i);
-        const response = await fetch(uri);
-        const data = await response.json();
-        propertiesToLoad.push(data);
-      }
-
-      setProperties(propertiesToLoad);
-
-      const escrow = new ethers.Contract(
-        config[network.chainId].escrow.address,
-        EscrowAbi,
-        provider
-      );
-      setEscrow(escrow);
-    };
-
-    initializeConnection();
-  }, []);
 
   const handleClickViewMore = (id: string) => {
     setIsPropertyDialogVisible(true);
@@ -81,10 +44,8 @@ export default function Home() {
           ))}
         </div>
       </div>
-      {propertySelected && escrow && provider ? (
+      {propertySelected ? (
         <ListingDialog
-          provider={provider}
-          escrow={escrow}
           property={propertySelected}
           isOpen={isPropertyDialogVisible}
           onOpenChange={(isOpen) => {
