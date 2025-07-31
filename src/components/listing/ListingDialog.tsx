@@ -223,7 +223,7 @@ export const ListingDialog = ({
         <DialogTitle className="text-2xl font-bold text-purple-900">
           {property.name}
         </DialogTitle>
-        <DialogDescription>
+        <DialogDescription className="sr-only">
           Property details for {property.name} located at {property.address}
         </DialogDescription>
 
