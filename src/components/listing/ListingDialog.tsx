@@ -10,12 +10,10 @@ import Image from "next/image";
 import { MapPin } from "lucide-react";
 import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
-import { useCallback, useEffect, useState } from "react";
 import { areAddressesEqual } from "@/lib/utils";
 import {
   useAccount,
   useReadContract,
-  useReadContracts,
   useSendTransaction,
   useWriteContract,
 } from "wagmi";
@@ -51,6 +49,7 @@ export const ListingDialog = ({
   });
 
   const { writeContract } = useWriteContract();
+  const { sendTransaction } = useSendTransaction();
 
   const [price, type, ...restAttributes] = attributes;
 
@@ -79,33 +78,61 @@ export const ListingDialog = ({
     refetchPropertyState();
   };
   const handleInspect = async () => {
-    // const signer = await provider.getSigner();
-    // const transaction = await escrow
-    //   .connect(signer)
-    //   .setInspectionStatus(id, true);
-    // await transaction.wait();
-    // refetchPropertyState();
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "setInspectionStatus",
+      args: [id, true],
+    });
+
+    refetchPropertyState();
   };
   const handleLend = async () => {
-    // const signer = await provider.getSigner();
-    // const transaction = await escrow.connect(signer).approveSale(id);
-    // await transaction.wait();
-    // const lendAmount =
-    //   (await escrow.getPurchasePrice(id)) - (await escrow.getEscrowAmount(id));
-    // await signer.sendTransaction({
-    //   to: await escrow.getAddress(),
-    //   value: lendAmount.toString(),
-    //   gasLimit: 60000,
-    // });
-    // refetchPropertyState();
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "approveSale",
+      args: [id],
+    });
+
+    const escrowAmount = await readContract(config, {
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "getEscrowAmount",
+      args: [id],
+    });
+    const purchasePrice = await readContract(config, {
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "getPurchasePrice",
+      args: [id],
+    });
+
+    const lendAmount = (purchasePrice as bigint) - (escrowAmount as bigint);
+
+    sendTransaction({
+      to: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      value: lendAmount,
+    });
+
+    refetchPropertyState();
   };
   const handleSell = async () => {
-    // const signer = await provider.getSigner();
-    // let transaction = await escrow.connect(signer).approveSale(id);
-    // await transaction.wait();
-    // transaction = await escrow.connect(signer).finalizeSale(id);
-    // await transaction.wait();
-    // refetchPropertyState();
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "approveSale",
+      args: [id],
+    });
+
+    writeContract({
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      abi: EscrowAbi,
+      functionName: "finalizeSale",
+      args: [id],
+    });
+
+    refetchPropertyState();
   };
 
   // TODO: Please refactor this!!! This is so ugly lol
