@@ -42,7 +42,6 @@ export default function Home() {
 
   return (
     <div>
-      <NavigationBar />
       <div className="max-w-7xl mx-auto my-0 py-0 px-5">
         <h3 className="mt-12 mx-0 mb-5 text-2xl font-bold">
           {totalSupply} available properties for you
