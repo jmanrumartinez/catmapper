@@ -24,6 +24,11 @@ import EscrowAbi from "@consts/abis/Escrow.json";
 import { readContract } from "@wagmi/core";
 import { config } from "@/config/wagmi";
 
+const baseEscrowContract = {
+  address: getContractAddress("escrow") as `0x${string}`,
+  abi: EscrowAbi,
+};
+
 type ListingDialogTypes = {
   isOpen: boolean;
   onOpenChange: (value: boolean) => void;
@@ -42,8 +47,7 @@ export const ListingDialog = ({
     useGetPropertyState(id);
 
   const { data: isListed } = useReadContract({
-    address: getContractAddress("escrow") as `0x${string}`,
-    abi: EscrowAbi,
+    ...baseEscrowContract,
     functionName: "isListed",
     args: [id],
   });
@@ -64,16 +68,14 @@ export const ListingDialog = ({
     console.log("escrowAmount", escrowAmount);
 
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "depositEscrow",
       args: [id],
       value: escrowAmount as bigint,
     });
 
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "approveSale",
       args: [id],
     });
@@ -82,8 +84,7 @@ export const ListingDialog = ({
   };
   const handleInspect = async () => {
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "setInspectionStatus",
       args: [id, true],
     });
@@ -92,21 +93,18 @@ export const ListingDialog = ({
   };
   const handleLend = async () => {
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "approveSale",
       args: [id],
     });
 
     const escrowAmount = await readContract(config, {
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "getEscrowAmount",
       args: [id],
     });
     const purchasePrice = await readContract(config, {
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "getPurchasePrice",
       args: [id],
     });
@@ -122,15 +120,13 @@ export const ListingDialog = ({
   };
   const handleSell = async () => {
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "approveSale",
       args: [id],
     });
 
     writeContract({
-      address: getContractAddress("escrow") as `0x${string}`,
-      abi: EscrowAbi,
+      ...baseEscrowContract,
       functionName: "finalizeSale",
       args: [id],
     });
