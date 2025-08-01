@@ -3,8 +3,8 @@ import Image from "next/image";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ListingAttributes } from "./ListingAttributes";
 import { PropertyType } from "@/types/listing";
+import { ListingAttributes } from "./ListingAttributes";
 
 export type ListingCardType = {
   property: PropertyType;

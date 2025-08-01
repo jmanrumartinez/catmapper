@@ -3,13 +3,13 @@
 import { ListingCard } from "@/components/listing/ListingCard";
 import { useState } from "react";
 
-import { ListingDialog } from "@/components/listing/ListingDialog";
-import { PropertyType } from "@/types/listing";
-import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
-import { useGetProperties } from "@/hooks/useGetProperties";
-import { ListingCardSkeleton } from "@/components/listing/ListingCardSkeleton";
 import { HomepageListingsContainer } from "@/components/homepage/HomepageListingsContainer";
 import { HomepageHeading } from "@/components/homepage/HomepageTitle";
+import { ListingCardSkeleton } from "@/components/listing/ListingCardSkeleton";
+import { ListingDialog } from "@/components/listing/ListingDialog";
+import { useGetProperties } from "@/hooks/useGetProperties";
+import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
+import { PropertyType } from "@/types/listing";
 
 export default function Home() {
   const { totalSupply, isLoading: isLoadingTotalSupply } = useGetTotalSupply();

@@ -1,16 +1,16 @@
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
-import { MapPin } from "lucide-react";
-import { PropertyType } from "@/types/listing";
 import { iconByType } from "@/consts/listing";
 import { areAddressesEqual, getContractAddress } from "@/lib/utils";
+import { PropertyType } from "@/types/listing";
+import { MapPin } from "lucide-react";
+import Image from "next/image";
 import {
   useAccount,
   useReadContract,
@@ -18,11 +18,11 @@ import {
   useWriteContract,
 } from "wagmi";
 
-import { useStakeHolders } from "@/hooks/useGetStakeholders";
+import { config } from "@/config/wagmi";
 import { useGetPropertyState } from "@/hooks/useGetPropertyState";
+import { useStakeHolders } from "@/hooks/useGetStakeholders";
 import EscrowAbi from "@consts/abis/Escrow.json";
 import { readContract } from "@wagmi/core";
-import { config } from "@/config/wagmi";
 
 const baseEscrowContract = {
   address: getContractAddress("escrow") as `0x${string}`,
