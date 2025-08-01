@@ -1,7 +1,13 @@
 import { getDefaultConfig } from "@rainbow-me/rainbowkit";
 import { hardhat, sepolia } from "wagmi/chains";
 
-const chain = process.env.USE_HARDHAT === "true" ? hardhat : sepolia;
+const chain =
+  process.env.NEXT_PUBLIC_USE_HARDHAT === "true" ? hardhat : sepolia;
+
+console.log(
+  "process.env.NEXT_PUBLIC_USE_HARDHAT",
+  process.env.NEXT_PUBLIC_USE_HARDHAT
+);
 
 const config = getDefaultConfig({
   appName: "Catmapper",

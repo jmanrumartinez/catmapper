@@ -15,7 +15,9 @@ export function getContractAddress(
   contractName: "realEstate" | "escrow"
 ): `0x${string}` {
   const chain =
-    process.env.USE_HARDHAT === "true" ? chainId.HARDHAT : chainId.SEPOLIA;
+    process.env.NEXT_PUBLIC_USE_HARDHAT === "true"
+      ? chainId.HARDHAT
+      : chainId.SEPOLIA;
   return config[chain as keyof typeof config][contractName]
     .address as `0x${string}`;
 }
