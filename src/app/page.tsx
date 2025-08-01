@@ -48,9 +48,9 @@ export default function Home() {
           {totalSupply} available properties for you
         </HomepageHeading>
         <HomepageListingsContainer>
-          {properties.map((property) => (
+          {properties.map((property, index) => (
             <ListingCard
-              key={property.id}
+              key={`${property.id}-${index}`}
               property={property}
               onClickViewMore={handleClickViewMore}
             />

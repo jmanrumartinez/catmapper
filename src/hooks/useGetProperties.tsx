@@ -11,8 +11,6 @@ export const useGetProperties = () => {
   const [isLoading, setIsLoading] = useState<boolean | undefined>();
   const [properties, setProperties] = useState<PropertyType[]>([]);
 
-  console.log("properties", properties);
-
   const fetchProperties = useCallback(async () => {
     if (!totalSupply) return;
     const propertiesToLoad = [];
