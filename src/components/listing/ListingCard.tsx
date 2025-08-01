@@ -34,12 +34,12 @@ export const ListingCard = ({ property, onClickViewMore }: ListingCardType) => {
       <CardContent className="px-4 pb-4 md:px-6 md:pb-6">
         <div className="space-y-4">
           <div>
-            <h2
+            <h3
               id={`property-title-${id}`}
               className="text-2xl font-bold text-purple-900 mb-1"
             >
               {price.value} ETH
-            </h2>
+            </h3>
             <p className="text-gray-600 text-sm flex items-center gap-1">
               <MapPin className="h-4 w-4" aria-hidden="true" />
               <span>{address}</span>

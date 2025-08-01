@@ -16,6 +16,8 @@ export const NavigationBar = () => {
               priority
             />
           </Link>
+
+          <h1 className="text-2xl font-bold">CatMapper</h1>
         </div>
 
         <div role="complementary" aria-label="Wallet connection">
