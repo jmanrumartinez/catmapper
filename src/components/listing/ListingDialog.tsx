@@ -7,22 +7,18 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { iconByType } from "@/consts/listing";
-import { areAddressesEqual, getContractAddress } from "@/lib/utils";
+import { getContractAddress } from "@/lib/utils";
 import { PropertyType } from "@/types/listing";
 import { MapPin } from "lucide-react";
 import Image from "next/image";
-import {
-  useAccount,
-  useReadContract,
-  useSendTransaction,
-  useWriteContract,
-} from "wagmi";
+import { useReadContract, useSendTransaction, useWriteContract } from "wagmi";
 
 import { config } from "@/config/wagmi";
+import { useGetCurrentRole } from "@/hooks/useGetCurrentRole";
 import { useGetPropertyState } from "@/hooks/useGetPropertyState";
-import { useStakeHolders } from "@/hooks/useGetStakeholders";
 import EscrowAbi from "@consts/abis/Escrow.json";
 import { readContract } from "@wagmi/core";
+import { useMemo } from "react";
 
 const baseEscrowContract = {
   address: getContractAddress("escrow") as `0x${string}`,
@@ -41,10 +37,11 @@ export const ListingDialog = ({
   property,
 }: ListingDialogTypes) => {
   const { attributes, id } = property;
-  const account = useAccount();
-  const { stakeholders } = useStakeHolders(id);
   const { propertyState, refetch: refetchPropertyState } =
     useGetPropertyState(id);
+  const { getCurrentUserRole } = useGetCurrentRole(id);
+
+  const userRole = useMemo(() => getCurrentUserRole(), [getCurrentUserRole]);
 
   const { data: isListed } = useReadContract({
     ...baseEscrowContract,
@@ -65,8 +62,6 @@ export const ListingDialog = ({
       args: [id],
     });
 
-    console.log("escrowAmount", escrowAmount);
-
     writeContract({
       ...baseEscrowContract,
       functionName: "depositEscrow",
@@ -82,6 +77,7 @@ export const ListingDialog = ({
 
     refetchPropertyState();
   };
+
   const handleInspect = async () => {
     writeContract({
       ...baseEscrowContract,
@@ -91,6 +87,7 @@ export const ListingDialog = ({
 
     refetchPropertyState();
   };
+
   const handleLend = async () => {
     writeContract({
       ...baseEscrowContract,
@@ -118,6 +115,7 @@ export const ListingDialog = ({
 
     refetchPropertyState();
   };
+
   const handleSell = async () => {
     writeContract({
       ...baseEscrowContract,
@@ -134,87 +132,60 @@ export const ListingDialog = ({
     refetchPropertyState();
   };
 
-  // TODO: Please refactor this!!! This is so ugly lol
-  const renderActionButton = () => {
+  const getPrimaryActionProps = () => {
     if (!isListed) {
-      return (
-        <Button
-          disabled
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          aria-label="Property has been bought"
-        >
-          Property bought
-        </Button>
-      );
+      return {
+        text: "Property bought",
+        onClick: undefined,
+        disabled: true,
+        "aria-label": "Property has been bought",
+      };
     }
 
-    if (
-      account.address &&
-      stakeholders?.buyer &&
-      areAddressesEqual(account.address, stakeholders.buyer)
-    ) {
-      return (
-        <Button
-          onClick={handleBuy}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasBeenBought}
-          aria-label={`Buy property at ${property.address} for ${price.value} ETH`}
-        >
-          Buy Now
-        </Button>
-      );
-    }
+    const props = {
+      buyer: {
+        text: "Buy Now",
+        onClick: handleBuy,
+        disabled: propertyState.hasBeenBought,
+        "aria-label": `Buy property at ${property.address} for ${price.value} ETH`,
+      },
+      inspector: {
+        text: "Approve inspection",
+        onClick: handleInspect,
+        disabled: propertyState.hasBeenInspected,
+        "aria-label": "Approve property inspection",
+      },
+      seller: {
+        text: "Approve & sell",
+        onClick: handleSell,
+        disabled: propertyState.hasBeenSold,
+        "aria-label": "Approve and sell property",
+      },
+      lender: {
+        text: "Approve & lend",
+        onClick: handleLend,
+        disabled: propertyState.hasBeenLent,
+        "aria-label": "Approve and provide lending for property",
+      },
+    };
 
-    if (
-      account.address &&
-      stakeholders.inspector &&
-      areAddressesEqual(account.address, stakeholders.inspector)
-    ) {
-      return (
-        <Button
-          onClick={handleInspect}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasBeenInspected}
-          aria-label="Approve property inspection"
-        >
-          Approve inspection
-        </Button>
-      );
-    }
+    return userRole ? props[userRole] : null;
+  };
 
-    if (
-      account.address &&
-      stakeholders.seller &&
-      areAddressesEqual(account.address, stakeholders.seller)
-    ) {
-      return (
-        <Button
-          onClick={handleSell}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasBeenSold}
-          aria-label="Approve and sell property"
-        >
-          Approve & sell
-        </Button>
-      );
-    }
+  const renderActionButton = () => {
+    const primaryActionProps = getPrimaryActionProps();
 
-    if (
-      account.address &&
-      stakeholders.lender &&
-      areAddressesEqual(account.address, stakeholders.lender)
-    ) {
-      return (
-        <Button
-          onClick={handleLend}
-          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
-          disabled={propertyState.hasBeenLent}
-          aria-label="Approve and provide lending for property"
-        >
-          Approve & lend
-        </Button>
-      );
-    }
+    if (!primaryActionProps) return null;
+    const { text, ...props } = primaryActionProps;
+
+    return (
+      <Button
+        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white cursor-pointer"
+        {...props}
+      >
+        {text}
+      </Button>
+    );
   };
 
   return (
@@ -285,7 +256,7 @@ export const ListingDialog = ({
               Property Actions
             </h4>
             <div className="flex gap-3">
-              {Object.keys(stakeholders).length ? renderActionButton() : null}
+              {renderActionButton()}
               <Button
                 variant="outline"
                 className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 bg-transparent cursor-pointer"
