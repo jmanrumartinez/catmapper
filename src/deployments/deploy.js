@@ -1,62 +1,29 @@
 import hre from "hardhat";
-import { parseEther } from "viem";
 
 async function main() {
-  const [buyer, seller, inspector, lender] = await hre.ethers.getSigners();
+    const [seller, inspector, lender] = await hre.ethers.getSigners();
 
-  const realEstateFactory = await hre.ethers.getContractFactory("RealEstate");
-  const realEstate = await realEstateFactory.deploy();
-  await realEstate.waitForDeployment();
+    const realEstateFactory = await hre.ethers.getContractFactory("RealEstate");
+    const realEstate = await realEstateFactory.deploy();
+    await realEstate.waitForDeployment();
 
-  console.log(`Deployed Real Estate contract at: ${await realEstate.getAddress()}`)
-  console.log('Now minting 3 properties... 👀');
+    console.log(`Deployed Real Estate contract at: ${await realEstate.getAddress()}`)
 
-  const mintingPromises = Array.from({ length: 3 }, () => null).map(async (_, index) => {
-    const transaction = await realEstate.connect(seller).mint(`https://ipfs.io/ipfs/QmQVcpsjrA6cr1iJjZAodYwmPekYgbnXGo4DFubJiLc2EB/${index + 1}.json`);
-    await transaction.wait();
+    const escrowFactory = await hre.ethers.getContractFactory("Escrow");
+    const realEstateAddress = await realEstate.getAddress();
+    const escrow = await escrowFactory.deploy(
+        realEstateAddress,
+        seller.address,
+        inspector.address,
+        lender.address,
+    );
+    await escrow.waitForDeployment();
 
-    console.log(`Minted property ${index + 1} at: ${transaction.hash}`);
-  });
-
-  await Promise.all(mintingPromises);
-
-  const escrowFactory = await hre.ethers.getContractFactory("Escrow");
-  const realEstateAddress = await realEstate.getAddress();
-  const escrow = await escrowFactory.deploy(
-    realEstateAddress,
-    seller.address,
-    inspector.address,
-    lender.address,
-  );
-  await escrow.waitForDeployment();
-
-  console.log(`Deployed Escrow contract at: ${await escrow.getAddress()}`)
-
-  const approvePromises = Array.from({ length: 3 }, () => null).map(async (_, index) => {
-    const transaction = await realEstate.connect(seller).approve(await escrow.getAddress(), index + 1);
-    await transaction.wait();
-  });
-
-  await Promise.all(approvePromises);
-
-  const pricePerIndex = {
-    0: "20",
-    1: "15",
-    2: "10"
-  }
-
-  const listPromises = Array.from({ length: 3 }, () => null).map(async (_, index) => {
-    const transaction = await escrow.connect(seller).list(index + 1, buyer.address, parseEther(pricePerIndex[index] ?? "20"), parseEther("10"));
-    await transaction.wait();
-
-    console.log(`Listed property ${index + 1} at: ${transaction.hash} for 20 ETH`);
-  });
-
-  await Promise.all(listPromises);
+    console.log(`Deployed Escrow contract at: ${await escrow.getAddress()}`)
 
 }
 
 main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
+    console.error(error);
+    process.exitCode = 1;
 });
