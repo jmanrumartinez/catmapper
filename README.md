@@ -15,6 +15,10 @@ Now deployed at https://catmapper.vercel.app/ pointing to Sepolia 👀
 - **Smart Contract Integration**: Automated and transparent transaction processing
 - **Property Metadata**: Rich property information including location, price, bedrooms, bathrooms, and more
 
+## 🏗️ Architecture Overview
+
+![Architecture Overview](./public/overview_architecture.png)
+
 ## 🛠 Technology Stack
 
 ### Frontend
