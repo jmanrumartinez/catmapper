@@ -1,7 +1,6 @@
 "use client";
 
 import { ListingCard } from "@/components/listing/ListingCard";
-import { NavigationBar } from "@/components/shared/navigation/NavigationBar";
 import { useState } from "react";
 
 import { ListingDialog } from "@/components/listing/ListingDialog";
@@ -9,9 +8,11 @@ import { PropertyType } from "@/types/listing";
 import { useGetTotalSupply } from "@/hooks/useGetTotalSupply";
 import { useGetProperties } from "@/hooks/useGetProperties";
 import { ListingCardSkeleton } from "@/components/listing/ListingCardSkeleton";
+import { HomepageListingsContainer } from "@/components/homepage/HomepageListingsContainer";
+import { HomepageHeading } from "@/components/homepage/HomepageTitle";
 
 export default function Home() {
-  const { totalSupply } = useGetTotalSupply();
+  const { totalSupply, isLoading: isLoadingTotalSupply } = useGetTotalSupply();
   const { properties, isLoading: isLoadingProperties } = useGetProperties();
 
   // Dialog
@@ -25,31 +26,43 @@ export default function Home() {
     });
   };
 
-  const getListingList = () => {
-    if (isLoadingProperties) {
-      return Array.from({ length: 3 }).map((_, i) => (
-        <ListingCardSkeleton key={i} />
-      ));
+  const getContent = () => {
+    if (isLoadingProperties || isLoadingTotalSupply) {
+      return (
+        <>
+          <HomepageHeading>
+            <div className="h-8 w-1/4 bg-gray-200 rounded-full animate-pulse" />
+          </HomepageHeading>
+          <HomepageListingsContainer>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ListingCardSkeleton key={i} />
+            ))}
+          </HomepageListingsContainer>
+        </>
+      );
     }
-    return properties.map((property) => (
-      <ListingCard
-        key={property.id}
-        property={property}
-        onClickViewMore={handleClickViewMore}
-      />
-    ));
+
+    return (
+      <>
+        <HomepageHeading>
+          {totalSupply} available properties for you
+        </HomepageHeading>
+        <HomepageListingsContainer>
+          {properties.map((property) => (
+            <ListingCard
+              key={property.id}
+              property={property}
+              onClickViewMore={handleClickViewMore}
+            />
+          ))}
+        </HomepageListingsContainer>
+      </>
+    );
   };
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto my-0 py-0 px-5">
-        <h3 className="mt-12 mx-0 mb-5 text-2xl font-bold">
-          {totalSupply} available properties for you
-        </h3>
-        <div className="grid gap-2.5 grid-cols-[repeat(auto-fit,minmax(min(100%,350px),1fr))]">
-          {getListingList()}
-        </div>
-      </div>
+    <>
+      <div className="max-w-7xl mx-auto my-0 py-0 px-5">{getContent()}</div>
       {propertySelected ? (
         <ListingDialog
           property={propertySelected}
@@ -60,6 +73,6 @@ export default function Home() {
           }}
         />
       ) : null}
-    </div>
+    </>
   );
 }

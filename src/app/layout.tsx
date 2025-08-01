@@ -39,7 +39,7 @@ export default function RootLayout({
         <Providers>
           <div className="w-full">
             <NavigationBar />
-            <main id="main-content">{children}</main>
+            <main>{children}</main>
           </div>
         </Providers>
       </body>
