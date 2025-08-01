@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,13 +16,17 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  initialScale: 1,
+  width: "device-width",
+};
+
 export const metadata: Metadata = {
   title: "Catmapper - Find the next house for your cat",
   description:
     "Catmapper helps you discover and buy the perfect property for your feline friend. Browse listings, view details, and find your cat's next home with ease.",
   keywords:
     "real estate, property, NFT, blockchain, cat homes, real estate marketplace",
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
 };
 
