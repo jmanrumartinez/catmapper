@@ -1,8 +1,7 @@
 import hre from "hardhat";
+import "dotenv/config";
 
 async function main() {
-    const [seller, inspector, lender] = await hre.ethers.getSigners();
-
     const realEstateFactory = await hre.ethers.getContractFactory("RealEstate");
     const realEstate = await realEstateFactory.deploy();
     await realEstate.waitForDeployment();
@@ -13,14 +12,13 @@ async function main() {
     const realEstateAddress = await realEstate.getAddress();
     const escrow = await escrowFactory.deploy(
         realEstateAddress,
-        seller.address,
-        inspector.address,
-        lender.address,
+        process.env.SELLER_ADDRESS,
+        process.env.INSPECTOR_ADDRESS,
+        process.env.LENDER_ADDRESS,
     );
     await escrow.waitForDeployment();
 
     console.log(`Deployed Escrow contract at: ${await escrow.getAddress()}`)
-
 }
 
 main().catch((error) => {
