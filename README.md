@@ -1,6 +1,6 @@
 # 🏠 CatMapper - Real Estate NFT Marketplace
 
-A decentralized real estate marketplace built on Ethereum blockchain that allows users to tokenize, buy, sell, and trade real estate properties as NFTs with integrated escrow functionality.
+A decentralized real estate marketplace built on Ethereum blockchain that allows users to tokenize, buy, sell, and trade real estate properties as NFTs with integrated escrow functionality. Now deployed at https://catmapper.vercel.app/ 👀
 
 ![Quick Preview](./public/quick_preview.png)
 
